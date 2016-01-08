@@ -49,6 +49,8 @@ class HtmlFactory(val universe: doc.Universe, index: doc.Index) {
 
     "index.js",
     "jquery.js",
+    "jquery.jscrollpane.min.js",
+    "jquery.mousewheel.js",
     "scheduler.js",
     "diagrams.js",
     "template.js",
@@ -92,11 +94,12 @@ class HtmlFactory(val universe: doc.Universe, index: doc.Index) {
     libResources foreach (s => copyResource("lib/" + s))
 
     new page.Index(universe, index) writeFor this
-    new page.IndexScript(universe, index) writeFor this
+    page.IndexScript(universe, index) writeFor this
     if (index.hasDeprecatedMembers)
       new page.DeprecatedIndex(universe, index) writeFor this
     try {
       writeTemplates(_ writeFor this)
+
       for (letter <- index.firstLetterIndex) {
         new html.page.ReferenceIndex(letter._1, index, universe) writeFor this
       }

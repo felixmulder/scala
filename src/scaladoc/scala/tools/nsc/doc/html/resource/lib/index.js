@@ -13,16 +13,14 @@ var title = $(document).attr('title');
 
 var lastFragment = "";
 
+var scrollPaneApi = undefined;
+
 $(document).ready(function() {
     /* check if browser is mobile, if so hide class nav */
-    if( /Android|webOS|Mobi|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+    if(isMobile()) {
         $("#browser").toggleClass("full-screen");
         $("#content").toggleClass("full-screen");
-        $("#letters").toggle();
-        setTimeout(function() {
-            $(".packages").hide();
-            $("#kindfilter").hide();
-        }, 4000);
+        $("#kindfilter").toggle();
     }
 
     $('iframe').bind("load", function(){
@@ -49,6 +47,7 @@ $(document).ready(function() {
     scheduler.addLabel("init", 1);
     scheduler.addLabel("focus", 2);
     scheduler.addLabel("filter", 4);
+    scheduler.addLabel("search", 5);
 
     prepareEntityList();
     configureTextFilter();
@@ -69,11 +68,13 @@ $(document).ready(function() {
       configureKindFilter();
 
       $("#index-input").on("focus", function() {
-          $("#textfilter > .clear").show();
+          $("#textfilter > .input > .clear").show();
       });
 
       $("#index-input").on("blur", function() {
-          $("#textfilter > .clear").hide();
+          setTimeout(function() {
+              $("#textfilter > .input > .clear").hide();
+          }, 10);
       });
     }, 1500);
 });
@@ -295,68 +296,106 @@ function prepareEntityList() {
         .prepend("<a class='packfocus'>focus</a>");
 }
 
-/* Handles all key presses while scrolling around with keyboard shortcuts in left panel */
-function keyboardScrolldownLeftPane() {
+/* Handles all key presses while scrolling around with keyboard shortcuts in search results */
+function handleKeyNavigation() {
+    /** Iterates both back and forth among selected elements */
+    var EntityIterator = function (items) {
+        var it = this;
+        this.index = -1;
+        this.items = items;
+
+        /** Returns the next entry - if trying to select past last element, it
+         * returns the last element
+         */
+        it.next = function() {
+            it.index = Math.min(it.items.length - 1, it.index + 1);
+            return $(it.items[it.index]);
+        };
+
+        /** Returns the previous entry - will return `undefined` instead if
+         * selecting up from first element
+         */
+        it.prev = function() {
+            it.index = Math.max(-1, it.index - 1);
+            return it.index == -1 ? undefined : $(it.items[it.index]);
+        };
+    };
+
+    /** Scroll helper, ensures that the selected elem is inside the viewport */
+    var Scroller = function ($container) {
+        scroller = this;
+        scroller.container = $container;
+
+        scroller.scrollDown = function($elem) {
+            var yPos = $elem.offset().top; // offset relative to viewport
+            if ($container.height() < yPos) {
+                $container.animate({
+                    scrollTop: $container.scrollTop() + yPos - $("#search").height() - 10
+                }, 200);
+            }
+        };
+
+        scroller.scrollUp = function ($elem) {
+            var yPos = $elem.offset().top; // offset relative to viewport
+            if (yPos < $("#search").height()) {
+                $container.animate({
+                    scrollTop: $container.scrollTop() + yPos - $("#search").height() - 10
+                }, 200);
+            }
+        };
+
+        scroller.scrollTop = function() {
+            $container.animate({
+                scrollTop: 0
+            }, 200);
+        }
+    };
+
     scheduler.add("init", function() {
         $("#textfilter input").blur();
-        var $items = $("#tpl li");
-        $items.first().addClass('selected');
+        var items = new EntityIterator(
+            $("div#results-content > ul.entities span.entity > a").toArray()
+        );
+
+        var scroller = new Scroller($("#search-results"));
+
+        var $old = items.next();
+        $old.addClass("selected");
 
         $(window).bind("keydown", function(e) {
-            var $old = $items.filter('.selected'),
-                $new;
-
             switch ( e.keyCode ) {
-
             case 9: // tab
-                $old.removeClass('selected');
+                $old.removeClass("selected");
                 break;
 
             case 13: // enter
-                $old.removeClass('selected');
-                var $url = $old.children().filter('a:last').attr('href');
-                $("#template").attr("src",$url);
-                break;
-
-            case 27: // escape
-                $old.removeClass('selected');
-                $(window).unbind(e);
-                $("#textfilter input").focus();
-
+                var href = $old.attr("href");
+                location.replace(href);
+                $old.click();
+                $("#textfilter input").attr("value", "");
                 break;
 
             case 38: // up
-                $new = $old.prev();
+                $old.removeClass('selected');
+                $old = items.prev();
 
-                if (!$new.length) {
-                    $new = $old.parent().prev();
+                if ($old === undefined) {
+                    $(window).unbind("keydown");
+                    $("#textfilter input").focus();
+                    scroller.scrollTop();
+                    return false;
+                } else {
+                    $old.addClass("selected");
+                    scroller.scrollUp($old);
                 }
-
-                if ($new.is('ol') && $new.children(':last').is('ol')) {
-                    $new = $new.children().children(':last');
-                } else if ($new.is('ol')) {
-                    $new = $new.children(':last');
-                }
-
                 break;
 
             case 40: // down
-                $new = $old.next();
-                if (!$new.length) {
-                    $new = $old.parent().parent().next();
-                }
-                if ($new.is('ol')) {
-                    $new = $new.children(':first');
-                }
+                $old.removeClass("selected");
+                $old = items.next();
+                $old.addClass("selected");
+                scroller.scrollDown($old);
                 break;
-            }
-
-            if ($new && $new.is('li')) {
-                $old.removeClass('selected');
-                $new.addClass('selected');
-            } else if (e.keyCode == 38) {
-                $(window).unbind(e);
-                $("#textfilter input").focus();
             }
         });
     });
@@ -365,49 +404,52 @@ function keyboardScrolldownLeftPane() {
 /* Configures the text filter  */
 function configureTextFilter() {
     scheduler.add("init", function() {
-        $("#filter").prepend("<span class='toggle-sidebar'></span>");
-        $("#textfilter").append("<span class='input'><input placeholder='Filter' id='index-input' type='text' accesskey='/'/></span><span class='clear'>✖</span>");
+        $("#search").prepend("<span class='toggle-sidebar'></span>");
         var input = $("#textfilter input");
-        resizeFilterBlock();
         input.bind('keyup', function(event) {
-            if (event.keyCode == 27) { // escape
-                input.attr("value", "");
+            switch ( event.keyCode ) {
+                case 27: // escape
+                    input.attr("value", "");
+                    $("div#search-results").hide();
+                    $("#search > span.close-results").hide();
+                    $("#search > span.toggle-sidebar").show();
+                    $("#search > span#doc-title").show();
+                    break;
+
+                case 38: // up arrow
+                    return false;
+
+                case 40: // down arrow
+                    $(window).unbind("keydown");
+                    handleKeyNavigation();
+                    return false;
             }
-            if (event.keyCode == 40) { // down arrow
-                $(window).unbind("keydown");
-                keyboardScrolldownLeftPane();
-                return false;
-            }
-            textFilter();
+
+            searchAll();
         });
-        input.bind('keydown', function(event) {
-            if (event.keyCode == 9) { // tab
-                $("#template").contents().find("#mbrsel-input").focus();
-                input.attr("value", "");
-                return false;
-            }
-            textFilter();
-        });
-        input.focus(function(event) { input.select(); });
     });
     scheduler.add("init", function() {
-        $("#textfilter > .clear").click(function(){
+        $("#textfilter > .input > .clear").click(function() {
             $("#textfilter input").attr("value", "");
-            textFilter();
+            $("div#search-results").hide();
+            $("#search > span.close-results").hide();
+            $("#search > span.toggle-sidebar").show();
+            $("#search > span#doc-title").show();
         });
-        $("#filter > span.toggle-sidebar").click(function() {
+        $("#search > span.toggle-sidebar").click(function() {
             $("#browser").toggleClass("full-screen");
             $("#content").toggleClass("full-screen");
-            $(".packages").toggle();
-            $("#letters").toggle();
             $("#kindfilter").toggle();
         });
-        $(".pack").scroll(function() {
-            var scroll = $(".pack").scrollTop();
-            if (scroll > 0)
-                $("#filter").addClass("scrolled");
-            else
-                $("#filter").removeClass("scrolled");
+    });
+
+    scheduler.add("init", function() {
+        $("div#search > span.close-results").click(function() {
+            $("div#search-results").hide();
+            $("#search > span.close-results").hide();
+            $("#search > span.toggle-sidebar").show();
+            $("#search > span#doc-title").show();
+            $("#textfilter input").attr("value", "");
         });
     });
 }
@@ -428,6 +470,9 @@ function compilePattern(query) {
 // Filters all focused templates and packages. This function should be made less-blocking.
 //   @param query The string of the query
 function textFilter() {
+    if (scrollPaneApi)
+        scrollPaneApi.destroy();
+
     var query = $("#textfilter input").attr("value") || '';
     var queryRegExp = compilePattern(query);
 
@@ -475,6 +520,7 @@ function textFilter() {
                 if (matched.length > 0) {
                     $('#tpl').append(Index.createPackageTree(pack, matched,
                                                              focusFilterState));
+
                     scheduler.add('filter', searchLoop);
                     return;
                 }
@@ -489,6 +535,15 @@ function textFilter() {
 
         scheduler.add('filter', searchLoop);
     }
+
+    scheduler.scheduleLast("filter", function () {
+        if (!isMobile()) {
+            scrollPaneApi = $("#tpl").jScrollPane({
+                contentWidth: '0px',
+                verticalDragMinHeight: 140,
+            }).data().jsp;
+        }
+    });
 }
 
 /* Configures the hide tool by adding the hide link to all packages. */
@@ -516,20 +571,13 @@ function configureHideFilter() {
 function configureFocusFilter() {
     scheduler.add("init", function() {
         focusFilterState = null;
-        if ($("#focusfilter").length == 0) {
-            $("#filter").append("<div id='focusfilter'>focused on <span class='focuscoll'></span> <a class='focusremove'>✖</a></div>");
-            $("#focusfilter > .focusremove").click(function(event) {
-                textFilter();
-
-                $("#focusfilter").hide();
-                $("#kindfilter").show();
-                $("#tpl").removeClass("packfocused");
-                resizeFilterBlock();
-                focusFilterState = null;
-            });
+        $("#focusfilter > .focusremove").click(function(event) {
+            textFilter();
             $("#focusfilter").hide();
-            resizeFilterBlock();
-        }
+            $("#kindfilter").show();
+            $("#tpl").removeClass("packfocused");
+            focusFilterState = null;
+        });
     });
     scheduler.add("init", function() {
         $('#tpl li.pack a.packfocus').click(function () {
@@ -551,7 +599,6 @@ function focusFilter(package) {
 
     $("#focusfilter").show();
     $("#kindfilter").hide();
-    resizeFilterBlock();
     focusFilterState = currentFocus;
     kindFilterSync();
 
@@ -561,19 +608,11 @@ function focusFilter(package) {
 function configureKindFilter() {
     scheduler.add("init", function() {
         kindFilterState = "all";
-        $("#filter").append("<div id='kindfilter-container'><div id='kindfilter'><span>Fold All</span></div></div>");
-
-        while(isNaN(scrollbarWidth())) {
-          // wait until the width is available
-        }
-
-        $("#kindfilter").css({"margin-right": (scrollbarWidth() + 7) + "px"});
         $("#kindfilter").unbind("click");
         $("#kindfilter").click(function(event) {
             $("#kindfilter").toggleClass("open");
             kindFilter("packs");
         });
-        resizeFilterBlock();
     });
 }
 
@@ -611,10 +650,267 @@ function kindFilterSync() {
     }
 }
 
-function resizeFilterBlock() {
-    $("#tpl").css("top", $("#filter").outerHeight(true));
+/** Searches packages for entites matching the search query using a regex
+ *
+ * @param {[Object]} pack: package being searched
+ * @param {RegExp} regExp: a regular expression for finding matching entities
+ */
+function searchPackage(pack, regExp) {
+    scheduler.add("search", function() {
+        var entities = Index.PACKAGES[pack];
+        var matched = [];
+        var notMatching = [];
+
+        entities.forEach(function (elem) {
+            regExp.test(elem.name) ? matched.push(elem) : notMatching.push(elem);
+        });
+
+        var results = {
+            "matched": matched,
+            "notMatching": notMatching,
+            "package": pack
+        };
+
+        scheduler.add("search", function() {
+            handleSearchedPackage(results, regExp);
+        });
+    });
 }
 
-function scrollbarWidth() {
-  return $("#tpl").width() - $("#tpl")[0].clientWidth;
+function handleNonMatchingEntry(entity, ul, regExp, packageH1) {
+    var membersUl = document.createElement("ul");
+    searchEntity(entity, membersUl, regExp)
+        .then(function(res) {
+            if (res.length == 0) return;
+
+            packageH1.style.display = "block";
+
+            var name = entity.name.split('.').pop()
+            var nameElem = document.createElement("span");
+            nameElem.className = "entity";
+
+            var entityUrl = document.createElement("a");
+            entityUrl.title = name;
+            entityUrl.href = "#" + entity.name;
+
+            if (entity.kind == "object")
+                entityUrl.href += "$";
+
+            entityUrl.appendChild(document.createTextNode(name));
+
+            $(entityUrl).click(function() {
+                $("div#search-results").hide();
+                $("#search > span.close-results").hide();
+                $("#search > span.toggle-sidebar").show();
+                $("#search > span#doc-title").show();
+            });
+
+            nameElem.appendChild(entityUrl);
+
+            var iconElem = document.createElement("div");
+            iconElem.className = "icon " + entity.kind;
+
+            var li = document.createElement("li");
+            li.id = entity.name.replace(new RegExp("\\.", "g"),"-");
+            li.appendChild(iconElem);
+            li.appendChild(nameElem);
+
+            membersUl.className = "members";
+            li.appendChild(membersUl);
+
+            insertSorted(ul, li);
+        })
+}
+
+/** This function inserts `li` into the `ul` ordered by the li's id
+ *
+ * @param {Node} ul: the list in which to insert `li`
+ * @param {Node} li: item to insert
+ */
+function insertSorted(ul, li) {
+    var lis = ul.childNodes;
+    var beforeLi = null;
+
+    for (var i = 0; i < lis.length; i++) {
+        if (lis[i].id > li.id)
+            beforeLi = lis[i];
+    }
+
+    // if beforeLi == null, it will be inserted last
+    ul.insertBefore(li, beforeLi);
+}
+
+/** Defines the callback when a package has been searched and searches its
+ * members
+ *
+ * It will search all entities which matched the regExp.
+ *
+ * @param {Object} res: this is the searched package. It will contain the map
+ * from the `searchPackage`function.
+ * @param {RegExp} regExp
+ */
+function handleSearchedPackage(res, regExp) {
+    $("div#search-results").show();
+    $("#search > span.close-results").show();
+    $("#search > span.toggle-sidebar").hide();
+    $("#search > span#doc-title").hide();
+
+    var searchRes = document.getElementById("results-content")
+    var h1 = document.createElement("h1");
+    h1.className = "package";
+    h1.appendChild(document.createTextNode(res.package));
+
+    if (res.matched.length == 0)
+        h1.style.display = "none";
+
+    searchRes.appendChild(h1);
+
+    var ul = document.createElement("ul")
+    ul.className = "entities";
+
+    // Generate html list items from results
+    res.matched
+       .map(function(entity) { return listItem(entity, regExp); })
+       .forEach(function(li) { ul.appendChild(li); });
+
+    // Generate html (potentially) for items not matching the regExp
+    res.notMatching
+       .forEach(function(entity) { handleNonMatchingEntry(entity, ul, regExp, h1); });
+
+    searchRes.appendChild(ul);
+}
+
+/** Searches an entity asynchronously for regExp matches in an entity's members
+ *
+ * @param {Object} entity: the entity to be searched
+ * @param {Node} ul: the list in which to insert the list item created
+ * @param {RegExp} regExp
+ */
+function searchEntity(entity, ul, regExp) {
+    return new Promise(function(resolve, reject) {
+        var matchingMembers = $.grep(entity.members, function(member, i) {
+            return regExp.test(member.label);
+        });
+
+        resolve(matchingMembers);
+    })
+    .then(function(res) {
+        res.forEach(function(elem) {
+            var kind = document.createElement("span");
+            kind.className = "kind";
+            kind.appendChild(document.createTextNode(elem.kind));
+
+            var label = document.createElement("a");
+            label.title = elem.label;
+            label.href = elem.link;
+            label.className = "label";
+            label.appendChild(document.createTextNode(elem.label));
+
+            $(label).click(function() {
+                $("div#search-results").hide();
+                $("#search > span.close-results").hide();
+                $("#search > span.toggle-sidebar").show();
+                $("#search > span#doc-title").show();
+                $("#textfilter input").attr("value", "");
+            });
+
+            var tail = document.createElement("span");
+            tail.className = "tail";
+            tail.appendChild(document.createTextNode(elem.tail));
+
+            var li = document.createElement("li");
+            li.appendChild(kind);
+            li.appendChild(label);
+            li.appendChild(tail);
+
+            ul.appendChild(li);
+        });
+        return res;
+    });
+}
+
+/** Creates a list item representing an entity
+ *
+ * @param {Object} entity, the searched entity to be displayed
+ * @param {RegExp} regExp
+ * @return {Node} list item containing entity
+ */
+function listItem(entity, regExp) {
+    var name = entity.name.split('.').pop()
+    var nameElem = document.createElement("span");
+    nameElem.className = "entity";
+
+    var entityUrl = document.createElement("a");
+    entityUrl.title = name;
+    entityUrl.href = "#" + entity.name;
+
+    if (entity.kind == "object")
+        entityUrl.href += "$";
+
+    entityUrl.appendChild(document.createTextNode(name));
+
+    $(entityUrl).click(function() {
+        $("div#search-results").hide();
+        $("#search > span.close-results").hide();
+        $("#search > span.toggle-sidebar").show();
+        $("#search > span#doc-title").show();
+        $("#textfilter input").attr("value", "");
+    });
+
+    nameElem.appendChild(entityUrl);
+
+    var iconElem = document.createElement("div");
+    iconElem.className = "icon " + entity.kind;
+
+    var li = document.createElement("li");
+    li.id = entity.name.replace(new RegExp("\\.", "g"),"-");
+    li.appendChild(iconElem);
+    li.appendChild(nameElem);
+
+    var ul = document.createElement("ul");
+    ul.className = "members";
+
+    li.appendChild(ul);
+    searchEntity(entity, ul, regExp);
+
+    return li;
+}
+
+/** Searches all packages and entities for the current search string in
+ *  the input field "#textfilter"
+ *
+ * Then shows the results in div#search-results
+ */
+function searchAll() {
+    scheduler.clear("search"); // clear previous search
+    var searchStr = $("#textfilter input").attr("value").trim() || '';
+
+    if (searchStr === '') {
+        $("div#search-results").hide();
+        $("#search > span.close-results").hide();
+        $("#search > span.toggle-sidebar").show();
+        $("#search > span#doc-title").show();
+        return;
+    }
+
+    // Clear input field and results so as not to doubly display data
+    $("div#search-results > div#results-content").html("");
+
+    $("div#results-content")
+        .prepend("<span class='search-text'>"
+                +"  Showing results for <span class='query-str'>\"" + searchStr + "\"</span>"
+                +"</span>");
+
+    var regExp = compilePattern(searchStr);
+
+    // Search for all entities matching query
+    Index
+        .keys(Index.PACKAGES)
+        .sort()
+        .forEach(function(elem) { searchPackage(elem, regExp); })
+}
+
+/** Check if user agent is associated with a known mobile browser */
+function isMobile() {
+    return /Android|webOS|Mobi|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }

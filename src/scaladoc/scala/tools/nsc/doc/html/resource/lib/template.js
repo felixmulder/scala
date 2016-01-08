@@ -10,32 +10,6 @@ $(document).ready(function() {
         $('html,body').animate({scrollTop: $(this).offset().top - defHeight}, 500);
     });
 
-    /* Handle dynamic size of signature and offset the fullcommenttop div
-     * appropriately
-     *
-     * Some mobile devices render quite slowly, delay the margin-top
-     * calculation if mobile
-     */
-    if(/Android|webOS|Mobi|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-        setTimeout(function() {
-            $("div.fullcommenttop").css({
-                "margin-top": $("#definition").height() + $("#signature").height() + 15
-            });
-        }, 1000);
-    } else {
-        $("div.fullcommenttop").css({
-            "margin-top": $("#definition").height() + $("#signature").height() + 15
-        });
-    }
-
-    /* When the window is resized, adjust the fullcommenttop div's offset */
-    $(window).resize(function() {
-        $("div.fullcommenttop").css({
-            "margin-top": $("#definition").height() + $("#signature").height() + 15
-        });
-    });
-
-
     var controls = {
         visibility: {
             publicOnly: $("#visbl").find("> ol > li.public"),
@@ -526,20 +500,18 @@ function filter() {
       });
 
       if (membersVisible)
-        members.show();
+          members.show();
       else
-        members.hide();
+          members.hide();
     };
 
     return false;
 };
 
-function windowTitle()
-{
+function windowTitle() {
     try {
         parent.document.title=document.title;
-    }
-    catch(e) {
+    } catch(e) {
       // Chrome doesn't allow settings the parent's title when
       // used on the local file system.
     }

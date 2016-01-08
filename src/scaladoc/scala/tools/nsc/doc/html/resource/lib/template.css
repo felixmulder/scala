@@ -81,8 +81,8 @@ html {
   text-align: center;
   color: #858484;
   bottom: 0;
-  width: 100%;
   height: 20px;
+  margin: 0 1em 0.5em;
 }
 
 a[href] {
@@ -107,10 +107,13 @@ body.trait > div#definition {
 }
 
 #definition {
+  position: relative;
   display: block;
-  padding: 5px 0px;
-  height: 5.5em;
+  padding: 5px 0;
   padding: 0;
+  margin: 0.5em;
+  border-radius: 0.2em;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
 
 #definition > a > img {
@@ -156,13 +159,10 @@ body.trait > div#definition {
   min-height: 18px;
   font-size: 0.9em;
   padding: 8px;
-  box-shadow: 0 0 0.35em 0.05em rgba(0,0,0,0.5);
-  position: fixed;
-  top: 6.1em;
-  left: 0;
   width: 100%;
-  z-index: 9998;
   color: #103a51;
+  border-bottom-left-radius: 0.2em;
+  border-bottom-right-radius: 0.2em;
 }
 
 #signature > span.modifier_kind {
@@ -219,21 +219,11 @@ body.trait > div#definition {
 
 .value #definition {
   background-color: #103A51; /* blue */
-  position: fixed;
-  top: 0;
-  left: 0;
   width: 100%;
-  z-index: 9999;
 }
 
 .type #definition {
   background-color: rgba(49, 101, 85, 1); /* green */
-  position: fixed;
-  top: 0;
-  left: 0;
-  min-height: 5.5em;
-  width: 100%;
-  z-index: 9999;
 }
 
 .abstract.type #definition {
@@ -285,7 +275,7 @@ body.abstract.type div.big-circle {
 }
 
 #template {
-  margin: 0.9em 0.75em 2em 0.75em;
+  margin: 0.9em 0.75em 0.75em;
   border-radius: 0.2em;
   background-color: #fff;
   -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -496,7 +486,7 @@ div.members > ol > li:last-child {
 }
 
 .full-signature-usecase h4 span {
-  font-size: 0.9em;
+  font-size: 0.8rem;
 }
 
 .full-signature-usecase > #signature {
@@ -531,8 +521,8 @@ div.members > ol > li:last-child {
 #definition .morelinks {
   text-align: right;
   position: absolute;
-  top: 40px;
-  right: 10px;
+  top: 2.95em;
+  right: 1em;
   width: 450px;
   font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
 }
@@ -725,7 +715,7 @@ div.fullcomment {
 #template div.fullcommenttop,
 #template div.fullcomment {
   display:none;
-  margin: 5px 0 0 14.7em;
+  margin: 0.5em 1em 0 14.7em;
 }
 
 #template .shortcomment {
@@ -739,7 +729,6 @@ div.fullcomment .block {
   border-top: 2px solid #fff;
   margin-top: 5px;
   overflow: hidden;
-  margin-right: 0.5em;
   font-family: "Open Sans";
 }
 
@@ -1121,16 +1110,8 @@ only screen /* iPhone 6 */
 and (max-device-width: 667px)
 and (-webkit-device-pixel-ratio: 2)
 {
-  #definition {
-    position: absolute !important;
-    min-height: 0 !important;
-    height: 4em !important;
-  }
-
   #signature {
-    position: absolute !important;
     font-size: 0.7em;
-    top: 5.7em;
   }
 
   #definition > h1 {
@@ -1143,10 +1124,6 @@ and (-webkit-device-pixel-ratio: 2)
 
   #definition #owner {
     padding-top: 0.7em;
-  }
-
-  div.fullcommenttop {
-    margin-top: 11.6em;
   }
 
   #template .shortcomment {
