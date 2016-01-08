@@ -472,5 +472,78 @@ textarea, input { outline: none; }
 }
 
 .ui-layout-toggler {
-    background: #AAA;
+  background: #AAA;
 }
+
+div#search-results {
+  color: #103a51;
+  position: absolute;
+  left: 16.75em;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgb(240, 243, 246);
+  z-index: 999;
+  overflow-x: hidden;
+  display: none;
+  padding: 1em;
+}
+
+div#search-results > span.close-results {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  position: absolute;
+  top: 1em;
+  right: 1em;
+}
+
+div#search-results > span.close-results:hover {
+  cursor: pointer;
+}
+
+div#search-results > span.search-text {
+  font-size: 1.2em;
+}
+
+div#search-results > span.search-text > span.query-str {
+  font-weight: 900;
+}
+
+div#search-results > h1.package {
+  font-size: 1em;
+  margin: 1em 0;
+  color: #f16665;
+}
+
+div#search-results > ul.entities {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+div#search-results > ul.entities > li > div.icon {
+  float: left;
+  display: inline;
+  height: 1em;
+  width: 1em;
+  margin: 0.23em 0.3em 0 0;
+}
+
+div#search-results > ul.entities > li > div.icon.class {
+  background: url("class.svg") no-repeat center;
+  background-size: 1em 1em;
+}
+
+div#search-results > ul.entities > li > div.icon.trait {
+  background: url("trait.svg") no-repeat center;
+  background-size: 1em 1em;
+}
+
+div#search-results > ul.entities > li > span.entity {
+  font-size: 1.1em;
+  font-weight: 900;
+}
+
