@@ -94,7 +94,7 @@ class IndexScript(universe: doc.Universe, index: doc.Index) extends Page {
       "tail"   -> d
         .valueParams //List[List[ValueParam]]
         .map { params =>
-          params.map(p => p.name + ": " + p.resultType.name).mkString(",")
+          params.map(p => p.name + ": " + p.resultType.name).mkString(", ")
         }
         .mkString("(", ")(", "): " + d.resultType.name),
       "kind"   -> memberKindToString(d),
@@ -104,7 +104,7 @@ class IndexScript(universe: doc.Universe, index: doc.Index) extends Page {
     JSONObject(Map(
       "label"  -> v.definitionName.replaceAll(".*#", ""),
       "member" -> v.definitionName.replaceFirst("#", "."),
-      "tail"   -> ": " + v.resultType.name,
+      "tail"   -> (": " + v.resultType.name),
       "kind"   -> memberKindToString(v),
       "link"   -> memberToUrl(v)))
 
