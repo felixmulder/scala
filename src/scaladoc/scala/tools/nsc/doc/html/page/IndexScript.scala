@@ -76,6 +76,7 @@ class IndexScript(universe: doc.Universe, index: doc.Index) extends Page {
     }) : _*)
   }
 
+  /** Returns the json representation of the supplied members */
   def membersToJSON(entities: List[MemberEntity]): JSONType =
     JSONArray(entities map memberToJSON)
 

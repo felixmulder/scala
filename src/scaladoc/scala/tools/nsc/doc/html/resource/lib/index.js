@@ -661,6 +661,18 @@ function searchPackage(pack, regExp) {
     });
 }
 
+/** Defines the callback when a package has been searched and searches its
+ * members
+ *
+ * It will search all entities which matched the regExp.
+ *
+ * TODO: Implement search of entites which did not match the regExp, so that we
+ * may present entities which have members that match the regular expression
+ *
+ * @param {Promise} pack: this is the searched package. It will contain the map
+ * from the `searchPackage`function.
+ * @param {RegExp} regExp
+ */
 function handleSearchedPackage(pack, regExp) {
     pack.then(function(res) {
         if (res.matched.length == 0) return;
@@ -688,6 +700,12 @@ function handleSearchedPackage(pack, regExp) {
     });
 }
 
+/** Searches an entity asynchronously for regExp matches in an entity's members
+ *
+ * @param {Object} entity - the entity to be searched
+ * @param {Node} ul: the list in which to insert the list item created
+ * @param {RegExp} regExp
+ */
 function searchEntity(entity, ul, regExp) {
     new Promise(function(resolve, reject) {
         var matchingMembers = $.grep(entity.members, function(member, i) {
@@ -727,25 +745,31 @@ function searchEntity(entity, ul, regExp) {
     });
 }
 
+/** Creates a list item representing an entity
+ *
+ * @param {Object} entity, the searched entity to be displayed
+ * @param {RegExp} regExp
+ * @return {Node} list item containing entity
+ */
 function listItem(entity, regExp) {
     var name = entity.name.split('.').pop()
     var nameElem = document.createElement("span");
     nameElem.className = "entity";
 
-    var memberUrl = document.createElement("a");
-    memberUrl.title = name;
-    memberUrl.href = "#" + entity.name;
+    var entityUrl = document.createElement("a");
+    entityUrl.title = name;
+    entityUrl.href = "#" + entity.name;
 
     if (entity.kind == "object")
-        memberUrl.href += "$";
+        entityUrl.href += "$";
 
-    memberUrl.appendChild(document.createTextNode(name));
+    entityUrl.appendChild(document.createTextNode(name));
 
-    $(memberUrl).click(function() {
+    $(entityUrl).click(function() {
         $("div#search-results").hide();
     });
 
-    nameElem.appendChild(memberUrl);
+    nameElem.appendChild(entityUrl);
 
     var iconElem = document.createElement("div");
     iconElem.className = "icon " + entity.kind;
@@ -766,6 +790,8 @@ function listItem(entity, regExp) {
 
 /** Searches all packages and entities for the current search string in
  *  the input field "#textfilter"
+ *
+ *  Then shows the results in div#search-results
  */
 function searchAll() {
     var searchStr = $("#textfilter input").attr("value").trim() || '';
