@@ -21,6 +21,27 @@
   url('open-sans-v13-latin-regular.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'Source Code Pro';
+  font-style: normal;
+  font-weight: 400;
+  src: url('source-code-pro-v6-latin-regular.eot');
+  src: local('Source Code Pro'), local('SourceCodePro-Regular'),
+  url('source-code-pro-v6-latin-regular.eot?#iefix') format('embedded-opentype'),
+  url('source-code-pro-v6-latin-regular.woff') format('woff'),
+  url('source-code-pro-v6-latin-regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Source Code Pro';
+  font-style: normal;
+  font-weight: 700;
+  src: url('source-code-pro-v6-latin-700.eot');
+  src: local('Source Code Pro Bold'), local('SourceCodePro-Bold'),
+  url('source-code-pro-v6-latin-700.eot?#iefix') format('embedded-opentype'),
+  url('source-code-pro-v6-latin-700.woff') format('woff'),
+  url('source-code-pro-v6-latin-700.ttf') format('truetype');
+}
+
 * {
   color: inherit;
   text-decoration: none;
@@ -551,3 +572,23 @@ div#search-results > ul.entities > li > span.entity {
   font-weight: 900;
 }
 
+div#search-results > ul.entities > li > ul.members {
+  margin-top: 0.5em;
+  list-style-type: none;
+  font-size: 0.85em;
+}
+
+div#search-results > ul.entities > li > ul.members > li {
+  margin: 0.25em 0;
+}
+
+div#search-results > ul.entities > li > ul.members >  li > span.kind,
+div#search-results > ul.entities > li > ul.members >  li > span.tail {
+  margin-right: 0.6em;
+  font-family: "Source Code Pro";
+}
+
+div#search-results > ul.entities > li > ul.members >  li > a.label {
+  color: #2C3D9B;
+  font-family: "Source Code Pro";
+}

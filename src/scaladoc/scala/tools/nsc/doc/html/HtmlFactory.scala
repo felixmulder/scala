@@ -106,8 +106,6 @@ class HtmlFactory(val universe: doc.Universe, index: doc.Index) {
     try {
       writeTemplates(_ writeFor this)
 
-      new SearchFactory(universe, index).generate()
-
       for (letter <- index.firstLetterIndex) {
         new html.page.ReferenceIndex(letter._1, index, universe) writeFor this
       }

@@ -92,7 +92,7 @@ class IndexScript(universe: doc.Universe, index: doc.Index) extends Page {
       "label"     -> d.definitionName.replaceAll(".*#", ""),
       "member"    -> d.definitionName.replaceFirst("#", "."),
       "kind"      -> memberKindToString(d),
-      "link"      -> relativeLinkTo(d.inTemplate),
+      "link"      -> memberToUrl(d),
       "type"      -> d.kind))
 
   def memberKindToString(mbr: MemberEntity): String = {
@@ -101,11 +101,20 @@ class IndexScript(universe: doc.Universe, index: doc.Index) extends Page {
 
     kind + space + kindToString(mbr)
   }
+
+  def memberToUrl(mbr: MemberEntity): String = {
+    def hashFromPath(templatePath: List[String]): String =
+      (templatePath.head.replace(".html", "") :: templatePath.tail)
+      .reverse
+      .mkString(".")
+
+    val containingTemplatePath = templateToPath(mbr.inTemplate)
+    val hash = hashFromPath(containingTemplatePath)
+    s"index.html#$hash@" + mbr.signature
+  }
 }
 
 object IndexScript {
   def apply(universe: doc.Universe, index: doc.Index) =
     new IndexScript(universe, index)
 }
-
-
