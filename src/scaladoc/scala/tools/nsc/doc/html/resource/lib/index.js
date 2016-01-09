@@ -726,7 +726,17 @@ function listItem(entity, regExp) {
     var name = entity.name.split('.').pop()
     var nameElem = document.createElement("span");
     nameElem.className = "entity";
-    nameElem.appendChild(document.createTextNode(name));
+
+    var memberUrl = document.createElement("a");
+    memberUrl.title = name;
+    memberUrl.href = "#" + entity.name;
+    memberUrl.appendChild(document.createTextNode(name));
+
+    $(memberUrl).click(function() {
+        $("div#search-results").hide();
+    });
+
+    nameElem.appendChild(memberUrl);
 
     var iconElem = document.createElement("div");
     iconElem.className = "icon " + entity.kind;
