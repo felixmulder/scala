@@ -81,19 +81,32 @@ class IndexScript(universe: doc.Universe, index: doc.Index) extends Page {
 
   def memberToJSON: MemberEntity => JSONObject = {
     case d: Def => defToJSON(d)
+    case v: Val => valToJSON(v)
     case m: MemberEntity =>
-      JSONObject(Map("member" -> m.definitionName, "error" -> "unsupported class!"))
-    case _ => ???
+      JSONObject(Map("member" -> m.definitionName,
+                     "error" -> "unsupported entity"))
   }
 
   @inline def defToJSON(d: Def): JSONObject =
     JSONObject(Map(
-      "signature" -> d.signature,
-      "label"     -> d.definitionName.replaceAll(".*#", ""),
-      "member"    -> d.definitionName.replaceFirst("#", "."),
-      "kind"      -> memberKindToString(d),
-      "link"      -> memberToUrl(d),
-      "type"      -> d.kind))
+      "label"  -> d.definitionName.replaceAll(".*#", ""),
+      "member" -> d.definitionName.replaceFirst("#", "."),
+      "tail"   -> d
+        .valueParams //List[List[ValueParam]]
+        .map { params =>
+          params.map(p => p.name + ": " + p.resultType.name).mkString(",")
+        }
+        .mkString("(", ")(", "): " + d.resultType.name),
+      "kind"   -> memberKindToString(d),
+      "link"   -> memberToUrl(d)))
+
+  @inline def valToJSON(v: Val): JSONObject =
+    JSONObject(Map(
+      "label"  -> v.definitionName.replaceAll(".*#", ""),
+      "member" -> v.definitionName.replaceFirst("#", "."),
+      "tail"   -> ": " + v.resultType.name,
+      "kind"   -> memberKindToString(v),
+      "link"   -> memberToUrl(v)))
 
   def memberKindToString(mbr: MemberEntity): String = {
     val kind = mbr.flags.map(_.text.asInstanceOf[Text].text).mkString(" ")
