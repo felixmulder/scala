@@ -485,6 +485,11 @@ function textFilter() {
                 if (matched.length > 0) {
                     $('#tpl').append(Index.createPackageTree(pack, matched,
                                                              focusFilterState));
+
+                    $("a.tplshow").click(function() {
+                        $("div#search-results").hide();
+                    });
+
                     scheduler.add('filter', searchLoop);
                     return;
                 }
@@ -711,7 +716,7 @@ function searchEntity(entity, ul, regExp) {
 
             var tail = document.createElement("span");
             tail.className = "tail";
-            tail.appendChild(document.createTextNode("[T](param: String): RetVal[T]"));
+            tail.appendChild(document.createTextNode(elem.tail));
 
             li.appendChild(kind);
             li.appendChild(label);
