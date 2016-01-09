@@ -661,11 +661,13 @@ function searchPackage(pack, regExp) {
     });
 }
 
-function handleNonMatchingEntry(entity, ul, regExp) {
+function handleNonMatchingEntry(entity, ul, regExp, packageH1) {
     var membersUl = document.createElement("ul");
     searchEntity(entity, membersUl, regExp)
         .then(function(res) {
             if (res.length == 0) return;
+
+            packageH1.style.display = "block";
 
             var name = entity.name.split('.').pop()
             var nameElem = document.createElement("span");
@@ -739,7 +741,7 @@ function handleSearchedPackage(pack, regExp) {
 
         // Generate html (potentially) for items not matching the regExp
         res.notMatching
-           .forEach(function(entity) { handleNonMatchingEntry(entity, ul, regExp); });
+           .forEach(function(entity) { handleNonMatchingEntry(entity, ul, regExp, h1); });
 
         searchRes.appendChild(ul);
     })
