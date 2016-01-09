@@ -661,13 +661,55 @@ function searchPackage(pack, regExp) {
     });
 }
 
+function handleNonMatchingEntry(entity, ul, regExp) {
+    var membersUl = document.createElement("ul");
+    searchEntity(entity, membersUl, regExp)
+        .then(function(res) {
+            if (res.length == 0) return;
+
+            var name = entity.name.split('.').pop()
+            var nameElem = document.createElement("span");
+            nameElem.className = "entity";
+
+            var entityUrl = document.createElement("a");
+            entityUrl.title = name;
+            entityUrl.href = "#" + entity.name;
+
+            if (entity.kind == "object")
+                entityUrl.href += "$";
+
+            entityUrl.appendChild(document.createTextNode(name));
+
+            $(entityUrl).click(function() {
+                $("div#search-results").hide();
+            });
+
+            nameElem.appendChild(entityUrl);
+
+            var iconElem = document.createElement("div");
+            iconElem.className = "icon " + entity.kind;
+
+            var li = document.createElement("li");
+            li.id = entity.name.replace(new RegExp("\\.", "g"),"-");
+            li.appendChild(iconElem);
+            li.appendChild(nameElem);
+
+            membersUl.className = "members";
+            li.appendChild(membersUl);
+
+            insertSorted(ul, li);
+        })
+}
+
+//TODO: not actually implemented properly!
+function insertSorted(ul, li) {
+    ul.appendChild(li);
+}
+
 /** Defines the callback when a package has been searched and searches its
  * members
  *
  * It will search all entities which matched the regExp.
- *
- * TODO: Implement search of entites which did not match the regExp, so that we
- * may present entities which have members that match the regular expression
  *
  * @param {Promise} pack: this is the searched package. It will contain the map
  * from the `searchPackage`function.
@@ -675,24 +717,30 @@ function searchPackage(pack, regExp) {
  */
 function handleSearchedPackage(pack, regExp) {
     pack.then(function(res) {
-        if (res.matched.length == 0) return;
-
-        // Generate html list items from results
-        var matchingEntities = res
-            .matched
-            .map(function(entity) { return listItem(entity, regExp); });
-
         $("div#search-results").show();
 
         var searchRes = document.getElementById("search-results")
         var h1 = document.createElement("h1");
         h1.className = "package";
         h1.appendChild(document.createTextNode(res.package));
+
+        if (res.matched.length == 0)
+            h1.style.display = "none";
+
         searchRes.appendChild(h1);
 
         var ul = document.createElement("ul")
         ul.className = "entities";
-        matchingEntities.forEach(function(li) { ul.appendChild(li); });
+
+        // Generate html list items from results
+        res.matched
+           .map(function(entity) { return listItem(entity, regExp); })
+           .forEach(function(li) { ul.appendChild(li); });
+
+        // Generate html (potentially) for items not matching the regExp
+        res.notMatching
+           .forEach(function(entity) { handleNonMatchingEntry(entity, ul, regExp); });
+
         searchRes.appendChild(ul);
     })
     .catch(function(err) {
@@ -707,7 +755,7 @@ function handleSearchedPackage(pack, regExp) {
  * @param {RegExp} regExp
  */
 function searchEntity(entity, ul, regExp) {
-    new Promise(function(resolve, reject) {
+    return new Promise(function(resolve, reject) {
         var matchingMembers = $.grep(entity.members, function(member, i) {
             return regExp.test(member.label);
         });
@@ -716,8 +764,6 @@ function searchEntity(entity, ul, regExp) {
     })
     .then(function(res) {
         res.forEach(function(elem) {
-            var li = document.createElement("li");
-
             var kind = document.createElement("span");
             kind.className = "kind";
             kind.appendChild(document.createTextNode(elem.kind));
@@ -736,12 +782,14 @@ function searchEntity(entity, ul, regExp) {
             tail.className = "tail";
             tail.appendChild(document.createTextNode(elem.tail));
 
+            var li = document.createElement("li");
             li.appendChild(kind);
             li.appendChild(label);
             li.appendChild(tail);
 
             ul.appendChild(li);
         });
+        return res;
     });
 }
 
