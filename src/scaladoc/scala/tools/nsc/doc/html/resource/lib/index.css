@@ -567,6 +567,11 @@ div#search-results > ul.entities > li > div.icon.trait {
   background-size: 1em 1em;
 }
 
+div#search-results > ul.entities > li > div.icon.object {
+  background: url("object.svg") no-repeat center;
+  background-size: 1em 1em;
+}
+
 div#search-results > ul.entities > li > span.entity {
   font-size: 1.1em;
   font-weight: 900;
