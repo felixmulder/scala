@@ -661,7 +661,7 @@ function handleSearchedPackage(pack, regExp) {
         if (res.matched.length == 0) return;
 
         // Generate html list items from results
-        var lis = res
+        var matchingMembers = res
             .matched
             .map(function(entity) { return listItem(entity, regExp); });
 
@@ -675,7 +675,7 @@ function handleSearchedPackage(pack, regExp) {
 
         var ul = document.createElement("ul")
         ul.className = "entities";
-        lis.forEach(function(li) { ul.appendChild(li); });
+        matchingMembers.forEach(function(li) { ul.appendChild(li); });
         searchRes.appendChild(ul);
     })
     .catch(function(err) {
@@ -694,7 +694,29 @@ function searchEntity(entity, ul, regExp) {
     .then(function(res) {
         res.forEach(function(elem) {
             var li = document.createElement("li");
-            li.appendChild(document.createTextNode(elem.label));
+
+            var kind = document.createElement("span");
+            kind.className = "kind";
+            kind.appendChild(document.createTextNode(elem.kind));
+
+            var label = document.createElement("a");
+            label.title = elem.label;
+            label.href = elem.link;
+            label.className = "label";
+            label.appendChild(document.createTextNode(elem.label));
+
+            $(label).click(function() {
+                $("div#search-results").hide();
+            });
+
+            var tail = document.createElement("span");
+            tail.className = "tail";
+            tail.appendChild(document.createTextNode("[T](param: String): RetVal[T]"));
+
+            li.appendChild(kind);
+            li.appendChild(label);
+            li.appendChild(tail);
+
             ul.appendChild(li);
         });
     });
