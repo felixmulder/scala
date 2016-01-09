@@ -123,8 +123,7 @@ class IndexScript(universe: doc.Universe, index: doc.Index) extends Page {
       case d: Def => jsonObject(d)
       case v: Val => jsonObject(v)
       case m: MemberEntity =>
-        JSONObject(Map("member" -> m.definitionName,
-                       "error" -> "unsupported entity"))
+        JSONObject(Map("member" -> m.definitionName, "error" -> "unsupported entity"))
     }
   }
 
