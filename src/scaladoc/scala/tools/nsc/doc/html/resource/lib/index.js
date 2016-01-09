@@ -633,17 +633,26 @@ function scrollbarWidth() {
  *
  * @param {[Object]} pack: package being searched
  * @param {RegExp} regExp: a regular expression for finding matching entities
- * @return {Promise} a promise containing an array of matching entities
+ * @return {Promise} a promise containing {"matched": [], "notMatching": [], package: String}
  */
 function searchPackage(pack, regExp) {
     return new Promise(function(resolve, reject) {
         var entities = Index.PACKAGES[pack];
 
+        //TODO: matched/notMatching should be replaced by "partition"
         var matched = $.grep(entities, function (entity, i) {
             return regExp.test(entity.name);
         });
 
-        resolve({"matched": matched, "package": pack});
+        var notMatching = $.grep(entities, function (entity, i) {
+            return !regExp.test(entity.name);
+        });
+
+        resolve({
+            "matched": matched,
+            "notMatching": notMatching,
+            "package": pack
+        });
     });
 }
 
@@ -652,43 +661,75 @@ function handleSearchedPackage(pack, regExp) {
         if (res.matched.length == 0) return;
 
         // Generate html list items from results
-        var html = res
+        var lis = res
             .matched
-            .map(function(entity) { return listItem(entity, regExp); })
-            .join('');
+            .map(function(entity) { return listItem(entity, regExp); });
 
         $("div#search-results").show();
-        $("div#search-results")
-            .append("<h1 class='package'>" + res.package + "</h1>"
-                    + "<ul class='entities'>"
-                    + html
-                    + "</ul>");
+
+        var searchRes = document.getElementById("search-results")
+        var h1 = document.createElement("h1");
+        h1.className = "package";
+        h1.appendChild(document.createTextNode(res.package));
+        searchRes.appendChild(h1);
+
+        var ul = document.createElement("ul")
+        ul.className = "entities";
+        lis.forEach(function(li) { ul.appendChild(li); });
+        searchRes.appendChild(ul);
     })
     .catch(function(err) {
         console.log(err);
     });
 }
 
+function searchEntity(entity, ul, regExp) {
+    new Promise(function(resolve, reject) {
+        var matchingMembers = $.grep(entity.members, function(member, i) {
+            return regExp.test(member.label);
+        });
+
+        resolve(matchingMembers);
+    })
+    .then(function(res) {
+        res.forEach(function(elem) {
+            var li = document.createElement("li");
+            li.appendChild(document.createTextNode(elem.label));
+            ul.appendChild(li);
+        });
+    });
+}
+
 function listItem(entity, regExp) {
     var name = entity.name.split('.').pop()
-    var nameElem = "<span class='entity'>" + name + "</span>";
-    var iconElem = "<div class='icon " + entity.kind + "'></div>";
+    var nameElem = document.createElement("span");
+    nameElem.className = "entity";
+    nameElem.appendChild(document.createTextNode(name));
 
-    return "<li id='" + entity.name + "'>"
-        + iconElem
-        + nameElem
-        + "<ul class='members'></ul>"
-        + "</li>";
+    var iconElem = document.createElement("div");
+    iconElem.className = "icon " + entity.kind;
+
+    var li = document.createElement("li");
+    li.id = entity.name.replace(new RegExp("\\.", "g"),"-");
+    li.appendChild(iconElem);
+    li.appendChild(nameElem);
+
+    var ul = document.createElement("ul");
+    ul.className = "members";
+
+    li.appendChild(ul);
+    searchEntity(entity, ul, regExp);
+
+    return li;
 }
 
 /** Searches all packages and entities for the current search string in
  *  the input field "#textfilter"
  */
 function searchAll() {
-    if (searchStr === '') return;
+    var searchStr = $("#textfilter input").attr("value").trim() || '';
 
-    var searchStr = $("#textfilter input").attr("value") || '';
-    var regExp = compilePattern(searchStr);
+    if (searchStr === '') return;
 
     // Clear input field and results so as not to doubly display data
     $("#textfilter input").val("");
@@ -698,10 +739,11 @@ function searchAll() {
     $("div#search-results > span.search-text").remove();
 
     $("div#search-results")
-        .append("<span class='search-text'>"
+        .prepend("<span class='search-text'>"
                 + "Showing results for <span class='query-str'>\"" + searchStr + "\"</span>"
                 +"</span>");
 
+    var regExp = compilePattern(searchStr);
     // Search for all entities matching query
     Index
         .keys(Index.PACKAGES)

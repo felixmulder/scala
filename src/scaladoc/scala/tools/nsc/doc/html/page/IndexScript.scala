@@ -89,6 +89,7 @@ class IndexScript(universe: doc.Universe, index: doc.Index) extends Page {
   @inline def defToJSON(d: Def): JSONObject =
     JSONObject(Map(
       "signature" -> d.signature,
+      "label"     -> d.definitionName.replaceAll(".*#", ""),
       "member"    -> d.definitionName.replaceFirst("#", "."),
       "kind"      -> memberKindToString(d),
       "link"      -> relativeLinkTo(d.inTemplate),

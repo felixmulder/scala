@@ -524,6 +524,10 @@ div#search-results > ul.entities {
   padding-left: 0;
 }
 
+div#search-results > ul.entities > li {
+  margin: 0.5em 0;
+}
+
 div#search-results > ul.entities > li > div.icon {
   float: left;
   display: inline;
