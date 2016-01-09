@@ -661,7 +661,7 @@ function handleSearchedPackage(pack, regExp) {
         if (res.matched.length == 0) return;
 
         // Generate html list items from results
-        var matchingMembers = res
+        var matchingEntities = res
             .matched
             .map(function(entity) { return listItem(entity, regExp); });
 
@@ -675,7 +675,7 @@ function handleSearchedPackage(pack, regExp) {
 
         var ul = document.createElement("ul")
         ul.className = "entities";
-        matchingMembers.forEach(function(li) { ul.appendChild(li); });
+        matchingEntities.forEach(function(li) { ul.appendChild(li); });
         searchRes.appendChild(ul);
     })
     .catch(function(err) {
@@ -730,6 +730,10 @@ function listItem(entity, regExp) {
     var memberUrl = document.createElement("a");
     memberUrl.title = name;
     memberUrl.href = "#" + entity.name;
+
+    if (entity.kind == "object")
+        memberUrl.href += "$";
+
     memberUrl.appendChild(document.createTextNode(name));
 
     $(memberUrl).click(function() {
