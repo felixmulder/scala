@@ -112,11 +112,11 @@ class IndexScript(universe: doc.Universe, index: doc.Index) extends Page {
      */
     def jsonObject(m: MemberEntity): JSONObject =
       JSONObject(Map(
-        "label"  -> m.definitionName.replaceAll(".*#", ""),
-        "member" -> m.definitionName.replaceFirst("#", "."),
+        "label"  -> m.definitionName.replaceAll(".*#", ""),  // member name
+        "member" -> m.definitionName.replaceFirst("#", "."), // full member name
         "tail"   -> memberTail(m),
-        "kind"   -> memberKindToString(m),
-        "link"   -> memberToUrl(m)))
+        "kind"   -> memberKindToString(m),                   // modifiers i.e. "abstract def"
+        "link"   -> memberToUrl(m)))                         // permalink to the member
 
     mbr match {
       case d: Def => jsonObject(d)
