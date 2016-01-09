@@ -35,7 +35,7 @@ class IndexScript(universe: doc.Universe, index: doc.Index) extends Page {
             Seq(
               kindToString(t) -> relativeLinkTo(t),
               "kind" -> kindToString(t),
-              "members" -> membersToJSON(t.members))
+              "members" -> membersToJSON(t.members.filter(!_.isShadowedOrAmbiguousImplicit)))
           }
 
           JSONObject(Map(pairs : _*) + ("name" -> key))
