@@ -859,7 +859,7 @@ function searchAll() {
     if (searchStr === '') return;
 
     // Clear input field and results so as not to doubly display data
-    $("#textfilter input").val("");
+    $("#textfilter input").val('');
     textFilter();
     $("div#search-results > .package").remove();
     $("div#search-results > .entities").remove();
@@ -867,10 +867,11 @@ function searchAll() {
 
     $("div#search-results")
         .prepend("<span class='search-text'>"
-                + "Showing results for <span class='query-str'>\"" + searchStr + "\"</span>"
+                +"  Showing results for <span class='query-str'>\"" + searchStr + "\"</span>"
                 +"</span>");
 
     var regExp = compilePattern(searchStr);
+
     // Search for all entities matching query
     Index
         .keys(Index.PACKAGES)
