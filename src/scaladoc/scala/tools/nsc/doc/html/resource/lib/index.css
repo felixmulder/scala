@@ -499,7 +499,7 @@ textarea, input { outline: none; }
 div#search-results {
   color: #103a51;
   position: absolute;
-  left: 16.75em;
+  left: 0;
   top: 0;
   right: 0;
   bottom: 0;
