@@ -703,9 +703,22 @@ function handleNonMatchingEntry(entity, ul, regExp, packageH1) {
         })
 }
 
-//TODO: not actually implemented properly!
+/** This function inserts `li` into the `ul` ordered by the li's id
+ *
+ * @param {Node} ul: the list in which to insert `li`
+ * @param {Node} li: item to insert
+ */
 function insertSorted(ul, li) {
-    ul.appendChild(li);
+    var lis = ul.childNodes;
+    var beforeLi = null;
+
+    for (var i = 0; i < lis.length; i++) {
+        if (lis[i].id > li.id)
+            beforeLi = lis[i];
+    }
+
+    // if beforeLi == null, it will be inserted last
+    ul.insertBefore(li, beforeLi);
 }
 
 /** Defines the callback when a package has been searched and searches its
