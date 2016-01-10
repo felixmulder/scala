@@ -496,7 +496,7 @@ div.members > ol > li:last-child {
 }
 
 .full-signature-usecase h4 span {
-  font-size: 0.9em;
+  font-size: 0.8rem;
 }
 
 .full-signature-usecase > #signature {
@@ -725,7 +725,7 @@ div.fullcomment {
 #template div.fullcommenttop,
 #template div.fullcomment {
   display:none;
-  margin: 5px 0 0 14.7em;
+  margin: 0.5em 1em 0 14.7em;
 }
 
 #template .shortcomment {
@@ -739,7 +739,6 @@ div.fullcomment .block {
   border-top: 2px solid #fff;
   margin-top: 5px;
   overflow: hidden;
-  margin-right: 0.5em;
   font-family: "Open Sans";
 }
 

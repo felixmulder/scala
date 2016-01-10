@@ -643,14 +643,11 @@ function scrollbarWidth() {
 function searchPackage(pack, regExp) {
     return new Promise(function(resolve, reject) {
         var entities = Index.PACKAGES[pack];
+        var matched = [];
+        var notMatching = [];
 
-        //TODO: matched/notMatching should be replaced by "partition"
-        var matched = $.grep(entities, function (entity, i) {
-            return regExp.test(entity.name);
-        });
-
-        var notMatching = $.grep(entities, function (entity, i) {
-            return !regExp.test(entity.name);
+        entities.forEach(function (elem) {
+            regExp.test(elem.name) ? matched.push(elem) : notMatching.push(elem);
         });
 
         resolve({
