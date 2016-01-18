@@ -74,7 +74,9 @@ $(document).ready(function() {
       });
 
       $("#index-input").on("blur", function() {
-          $("#textfilter > .clear").hide();
+          setTimeout(function() {
+              $("#textfilter > .clear").hide();
+          }, 10);
       });
     }, 1500);
 });
@@ -375,6 +377,7 @@ function configureTextFilter() {
             if (event.keyCode == 27) { // escape
                 input.attr("value", "");
                 $("div#search-results").hide();
+                $("#filter > span.toggle-sidebar").show();
             } else if (event.keyCode == 13) {
                 input.blur();
             }
@@ -411,6 +414,8 @@ function configureTextFilter() {
     scheduler.add("init", function() {
         $("#textfilter > .clear").click(function() {
             $("#textfilter input").attr("value", "");
+            $("div#search-results").hide();
+            $("#filter > span.toggle-sidebar").show();
             //textFilter();
         });
         $("#filter > span.toggle-sidebar").click(function() {
@@ -432,6 +437,8 @@ function configureTextFilter() {
     scheduler.add("init", function() {
         $("div#search-results > span.close-results").click(function() {
             $("div#search-results").hide();
+            $("#filter > span.toggle-sidebar").show();
+            $("#textfilter input").attr("value", "");
         });
     });
 }
@@ -499,10 +506,6 @@ function textFilter() {
                 if (matched.length > 0) {
                     $('#tpl').append(Index.createPackageTree(pack, matched,
                                                              focusFilterState));
-
-                    $("a.tplshow").click(function() {
-                        $("div#search-results").hide();
-                    });
 
                     scheduler.add('filter', searchLoop);
                     return;
@@ -689,6 +692,7 @@ function handleNonMatchingEntry(entity, ul, regExp, packageH1) {
 
             $(entityUrl).click(function() {
                 $("div#search-results").hide();
+                $("#filter > span.toggle-sidebar").show();
             });
 
             nameElem.appendChild(entityUrl);
@@ -738,6 +742,7 @@ function insertSorted(ul, li) {
 function handleSearchedPackage(pack, regExp) {
     pack.then(function(res) {
         $("div#search-results").show();
+        $("#filter > span.toggle-sidebar").hide();
 
         var searchRes = document.getElementById("search-results")
         var h1 = document.createElement("h1");
@@ -796,6 +801,7 @@ function searchEntity(entity, ul, regExp) {
 
             $(label).click(function() {
                 $("div#search-results").hide();
+                $("#filter > span.toggle-sidebar").show();
             });
 
             var tail = document.createElement("span");
@@ -835,6 +841,7 @@ function listItem(entity, regExp) {
 
     $(entityUrl).click(function() {
         $("div#search-results").hide();
+        $("#filter > span.toggle-sidebar").show();
     });
 
     nameElem.appendChild(entityUrl);
@@ -866,6 +873,7 @@ function searchAll() {
 
     if (searchStr === '') {
         $("div#search-results").hide();
+        $("#filter > span.toggle-sidebar").show();
         return;
     }
 

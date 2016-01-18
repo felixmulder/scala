@@ -38,7 +38,7 @@ class Index(universe: doc.Universe, val index: doc.Index) extends HtmlPage {
     <body>
       { browser }
       <div id="search-results">
-        <span class="close-results">✖</span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
       </div>
       <div id="content" class="ui-layout-center">
         <iframe id="template" name="template" src={ relativeLinkTo{List("package.html")} }/>
