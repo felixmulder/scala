@@ -13,16 +13,17 @@ var title = $(document).attr('title');
 
 var lastFragment = "";
 
+var scrollPaneApi = undefined;
+
 $(document).ready(function() {
     /* check if browser is mobile, if so hide class nav */
     if( /Android|webOS|Mobi|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
         $("#browser").toggleClass("full-screen");
         $("#content").toggleClass("full-screen");
-        $("#letters").toggle();
-        setTimeout(function() {
-            $(".packages").hide();
-            $("#kindfilter").hide();
-        }, 4000);
+    } else {
+        setTimeout(function () {
+            scrollPaneApi = initialiseScroll();
+        }, 1500);
     }
 
     $('iframe').bind("load", function(){
@@ -363,6 +364,7 @@ function keyboardScrolldownLeftPane() {
 }
 
 /* Configures the text filter  */
+var callingSearch = false;
 function configureTextFilter() {
     scheduler.add("init", function() {
         $("#filter").prepend("<span class='toggle-sidebar'></span>");
@@ -373,31 +375,43 @@ function configureTextFilter() {
             if (event.keyCode == 27) { // escape
                 input.attr("value", "");
                 $("div#search-results").hide();
+            } else if (event.keyCode == 13) {
+                input.blur();
             }
-            if (event.keyCode == 40) { // down arrow
-                $(window).unbind("keydown");
-                keyboardScrolldownLeftPane();
-                return false;
-            }
-            if (event.keyCode == 13)
-                searchAll();
-            else
-                textFilter();
+            //if (event.keyCode == 40) { // down arrow
+            //    $(window).unbind("keydown");
+            //    keyboardScrolldownLeftPane();
+            //    return false;
+            //}
+            //if (event.keyCode == 13)
+            //    searchAll();
+            //else
+            //    textFilter();
+
+            // Don't call search immediately to let the user type some letters
+            setTimeout(function() {
+                if (!callingSearch) {
+                    callingSearch = true;
+                    searchAll();
+                    callingSearch = false;
+                }
+            }, 500);
+
         });
-        input.bind('keydown', function(event) {
-            if (event.keyCode == 9) { // tab
-                $("#template").contents().find("#mbrsel-input").focus();
-                input.attr("value", "");
-                return false;
-            }
-            textFilter();
-        });
-        input.focus(function(event) { input.select(); });
+        //input.bind('keydown', function(event) {
+        //    if (event.keyCode == 9) { // tab
+        //        $("#template").contents().find("#mbrsel-input").focus();
+        //        input.attr("value", "");
+        //        return false;
+        //    }
+        //    textFilter();
+        //});
+        //input.focus(function(event) { input.select(); });
     });
     scheduler.add("init", function() {
-        $("#textfilter > .clear").click(function(){
+        $("#textfilter > .clear").click(function() {
             $("#textfilter input").attr("value", "");
-            textFilter();
+            //textFilter();
         });
         $("#filter > span.toggle-sidebar").click(function() {
             $("#browser").toggleClass("full-screen");
@@ -578,15 +592,11 @@ function configureKindFilter() {
         kindFilterState = "all";
         $("#filter").append("<div id='kindfilter-container'><div id='kindfilter'><span>Fold All</span></div></div>");
 
-        while(isNaN(scrollbarWidth())) {
-          // wait until the width is available
-        }
-
-        $("#kindfilter").css({"margin-right": (scrollbarWidth() + 7) + "px"});
         $("#kindfilter").unbind("click");
         $("#kindfilter").click(function(event) {
             $("#kindfilter").toggleClass("open");
             kindFilter("packs");
+            scrollPaneApi.destroy();
         });
         resizeFilterBlock();
     });
@@ -601,6 +611,7 @@ function kindFilter(kind) {
         $("#kindfilter").click(function(event) {
             $("#kindfilter").toggleClass("open");
             kindFilter("all");
+            scrollPaneApi = initialiseScroll();
         });
     }
     else {
@@ -611,6 +622,7 @@ function kindFilter(kind) {
         $("#kindfilter").click(function(event) {
             $("#kindfilter").toggleClass("open");
             kindFilter("packs");
+            scrollPaneApi.destroy();
         });
     }
 }
@@ -628,10 +640,6 @@ function kindFilterSync() {
 
 function resizeFilterBlock() {
     $("#tpl").css("top", $("#filter").outerHeight(true));
-}
-
-function scrollbarWidth() {
-  return $("#tpl").width() - $("#tpl")[0].clientWidth;
 }
 
 /** Searches packages for entites matching the search query using a regex
@@ -856,11 +864,14 @@ function listItem(entity, regExp) {
 function searchAll() {
     var searchStr = $("#textfilter input").attr("value").trim() || '';
 
-    if (searchStr === '') return;
+    if (searchStr === '') {
+        $("div#search-results").hide();
+        return;
+    }
 
     // Clear input field and results so as not to doubly display data
-    $("#textfilter input").val('');
-    textFilter();
+    //$("#textfilter input").val('');
+    //textFilter();
     $("div#search-results > .package").remove();
     $("div#search-results > .entities").remove();
     $("div#search-results > span.search-text").remove();
@@ -878,4 +889,12 @@ function searchAll() {
         .sort()
         .map(function(elem) { return searchPackage(elem, regExp); })
         .map(function(elem) { handleSearchedPackage(elem, regExp); });
+}
+
+function initialiseScroll() {
+    return $("#tpl").jScrollPane({
+        autoReinitialise: true,
+        contentWidth: '0px',
+        verticalDragMinHeight: 140,
+    }).data().jsp;
 }

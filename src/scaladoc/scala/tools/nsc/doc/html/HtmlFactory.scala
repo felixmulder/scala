@@ -51,6 +51,8 @@ class HtmlFactory(val universe: doc.Universe, index: doc.Index) {
     "jquery-ui.js",
     "jquery.js",
     "jquery.layout.js",
+    "jquery.jscrollpane.min.js",
+    "jquery.mousewheel.js",
     "scheduler.js",
     "diagrams.js",
     "template.js",

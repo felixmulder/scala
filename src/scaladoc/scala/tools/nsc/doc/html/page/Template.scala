@@ -115,9 +115,9 @@ class Template(universe: doc.Universe, generator: DiagramGenerator, tpl: DocTemp
         <h1>{ displayName }</h1>{
           if (tpl.isPackage) NodeSeq.Empty else <h3>{companionAndPackage(tpl)}</h3>
         }{ permalink(tpl) }
+        { signature(tpl, isSelf = true) }
       </div>
 
-      { signature(tpl, isSelf = true) }
       { memberToCommentHtml(tpl, tpl.inTemplate, isSelf = true) }
 
       <div id="mbrsel">
