@@ -81,8 +81,8 @@ html {
   text-align: center;
   color: #858484;
   bottom: 0;
-  width: 100%;
   height: 20px;
+  margin: 0 1em 0.5em;
 }
 
 a[href] {
@@ -275,7 +275,7 @@ body.abstract.type div.big-circle {
 }
 
 #template {
-  margin: 0.9em 0.75em 2em 0.75em;
+  margin: 0.9em 0.75em 0.75em;
   border-radius: 0.2em;
   background-color: #fff;
   -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.1);
