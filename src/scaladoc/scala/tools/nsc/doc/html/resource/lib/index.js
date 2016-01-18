@@ -802,6 +802,7 @@ function searchEntity(entity, ul, regExp) {
             $(label).click(function() {
                 $("div#search-results").hide();
                 $("#filter > span.toggle-sidebar").show();
+                $("#textfilter input").attr("value", "");
             });
 
             var tail = document.createElement("span");
@@ -842,6 +843,7 @@ function listItem(entity, regExp) {
     $(entityUrl).click(function() {
         $("div#search-results").hide();
         $("#filter > span.toggle-sidebar").show();
+        $("#textfilter input").attr("value", "");
     });
 
     nameElem.appendChild(entityUrl);
