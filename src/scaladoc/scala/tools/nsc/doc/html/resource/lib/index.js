@@ -66,12 +66,12 @@ $(document).ready(function() {
       configureKindFilter();
 
       $("#index-input").on("focus", function() {
-          $("#textfilter > .clear").show();
+          $("#textfilter > .input > .clear").show();
       });
 
       $("#index-input").on("blur", function() {
           setTimeout(function() {
-              $("#textfilter > .clear").hide();
+              $("#textfilter > .input > .clear").hide();
           }, 10);
       });
     }, 1500);
@@ -366,7 +366,6 @@ var callingSearch = false;
 function configureTextFilter() {
     scheduler.add("init", function() {
         $("#search").prepend("<span class='toggle-sidebar'></span>");
-        $("#textfilter").append("<span class='input'><input placeholder='Search' id='index-input' type='text' accesskey='/'/></span><span class='clear'>✖</span>");
         var input = $("#textfilter input");
         input.bind('keyup', function(event) {
             if (event.keyCode == 27) { // escape
@@ -409,7 +408,7 @@ function configureTextFilter() {
         //input.focus(function(event) { input.select(); });
     });
     scheduler.add("init", function() {
-        $("#textfilter > .clear").click(function() {
+        $("#textfilter > .input > .clear").click(function() {
             $("#textfilter input").attr("value", "");
             $("div#search-results").hide();
             $("#search > span.close-results").hide();
@@ -586,8 +585,6 @@ function focusFilter(package) {
 function configureKindFilter() {
     scheduler.add("init", function() {
         kindFilterState = "all";
-        $("#search").append("<div id='kindfilter-container'><div id='kindfilter'><span>Fold All</span></div></div>");
-
         $("#kindfilter").unbind("click");
         $("#kindfilter").click(function(event) {
             $("#kindfilter").toggleClass("open");

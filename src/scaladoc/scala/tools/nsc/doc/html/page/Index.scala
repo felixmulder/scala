@@ -70,7 +70,16 @@ class Index(universe: doc.Universe, val index: doc.Index) extends HtmlPage {
       <div id="search">
           <span id="doc-title">{universe.settings.doctitle.value}</span>
           <span class="close-results"><span class="left">&lt;</span> Back</span>
-          <div id="textfilter"></div>
+          <div id="textfilter">
+            <span class="input">
+              <input placeholder="Search" id="index-input" type="text" accesskey="/"/>
+              <span class="clear">✖</span>
+            </span>
+          </div>
+
+          <div id="kindfilter-container">
+            <div id="kindfilter"><span>Fold All</span></div>
+          </div>
       </div>
       <div id="browser">
         <div id='focusfilter'>
