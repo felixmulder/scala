@@ -296,66 +296,55 @@ function prepareEntityList() {
 
 /* Handles all key presses while scrolling around with keyboard shortcuts in left panel */
 function keyboardScrolldownLeftPane() {
+
+    var DEndedIterator = function (items) {
+        var it = this;
+        this.index = -1;
+        this.items = items;
+
+        it.next = function() {
+            it.index = Math.min(it.items.length - 1, it.index + 1);
+            return it.items[it.index];
+        };
+
+        it.prev = function() {
+            it.index = Math.max(0, it.index - 1);
+            return it.items[it.index];
+        };
+    };
+
     scheduler.add("init", function() {
         $("#textfilter input").blur();
-        var $items = $("#tpl li");
-        $items.first().addClass('selected');
+        var items = new DEndedIterator(
+            $("div#results-content > ul.entities span.entity > a").toArray()
+        );
+
+        var $old = $(items.next());
+        $old.addClass('selected');
 
         $(window).bind("keydown", function(e) {
-            var $old = $items.filter('.selected'),
-                $new;
-
             switch ( e.keyCode ) {
-
             case 9: // tab
                 $old.removeClass('selected');
                 break;
 
             case 13: // enter
-                $old.removeClass('selected');
-                var $url = $old.children().filter('a:last').attr('href');
-                $("#template").attr("src",$url);
-                break;
-
-            case 27: // escape
-                $old.removeClass('selected');
-                $(window).unbind(e);
-                $("#textfilter input").focus();
-
+                var href = $old.attr("href");
+                location.replace(href);
+                $old.click();
                 break;
 
             case 38: // up
-                $new = $old.prev();
-
-                if (!$new.length) {
-                    $new = $old.parent().prev();
-                }
-
-                if ($new.is('ol') && $new.children(':last').is('ol')) {
-                    $new = $new.children().children(':last');
-                } else if ($new.is('ol')) {
-                    $new = $new.children(':last');
-                }
-
+                $old.removeClass('selected');
+                $old = $(items.prev());
+                $old.addClass('selected');
                 break;
 
             case 40: // down
-                $new = $old.next();
-                if (!$new.length) {
-                    $new = $old.parent().parent().next();
-                }
-                if ($new.is('ol')) {
-                    $new = $new.children(':first');
-                }
-                break;
-            }
-
-            if ($new && $new.is('li')) {
                 $old.removeClass('selected');
-                $new.addClass('selected');
-            } else if (e.keyCode == 38) {
-                $(window).unbind(e);
-                $("#textfilter input").focus();
+                $old = $(items.next());
+                $old.addClass('selected');
+                break;
             }
         });
     });
@@ -374,18 +363,11 @@ function configureTextFilter() {
                 $("#search > span.close-results").hide();
                 $("#search > span.toggle-sidebar").show();
                 $("#search > span#doc-title").show();
-            } else if (event.keyCode == 13) {
-                input.blur();
+            } else if (event.keyCode == 40) { // down arrow
+                $(window).unbind("keydown");
+                keyboardScrolldownLeftPane();
+                return false;
             }
-            //if (event.keyCode == 40) { // down arrow
-            //    $(window).unbind("keydown");
-            //    keyboardScrolldownLeftPane();
-            //    return false;
-            //}
-            //if (event.keyCode == 13)
-            //    searchAll();
-            //else
-            //    textFilter();
 
             // Don't call search immediately to let the user type some letters
             setTimeout(function() {
@@ -395,17 +377,7 @@ function configureTextFilter() {
                     callingSearch = false;
                 }
             }, 500);
-
         });
-        //input.bind('keydown', function(event) {
-        //    if (event.keyCode == 9) { // tab
-        //        $("#template").contents().find("#mbrsel-input").focus();
-        //        input.attr("value", "");
-        //        return false;
-        //    }
-        //    textFilter();
-        //});
-        //input.focus(function(event) { input.select(); });
     });
     scheduler.add("init", function() {
         $("#textfilter > .input > .clear").click(function() {
@@ -414,7 +386,6 @@ function configureTextFilter() {
             $("#search > span.close-results").hide();
             $("#search > span.toggle-sidebar").show();
             $("#search > span#doc-title").show();
-            //textFilter();
         });
         $("#search > span.toggle-sidebar").click(function() {
             $("#browser").toggleClass("full-screen");

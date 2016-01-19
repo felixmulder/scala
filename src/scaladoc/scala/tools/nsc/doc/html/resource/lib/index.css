@@ -58,8 +58,13 @@ a:hover {
   text-decoration: underline;
 }
 
-.selected {
-  background-color: #2E6D82;
+span.entity > a {
+  padding: 0.1em 0.5em;
+}
+
+span.entity > a.selected {
+  background-color: #C2D2DC;
+  border-radius: 0.2em;
 }
 
 html {
@@ -186,7 +191,7 @@ textarea, input { outline: none; }
   position: relative;
   display: block;
   padding: 0.2em;
-  max-width: 38em;
+  max-width: 48.5em;
   margin: 0 auto;
 }
 
@@ -507,10 +512,17 @@ div#search > span.close-results {
   left: 1em;
   color: #fff;
   display: none;
+  z-index: 1;
 }
 
 div#search > span.close-results:hover {
   cursor: pointer;
+}
+
+div#results-content {
+  max-width: 48em;
+  margin: 0 auto;
+  width: 80%;
 }
 
 div#results-content > span.search-text {
