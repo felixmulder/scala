@@ -90,7 +90,7 @@ textarea, input { outline: none; }
   left: -15em;
 }
 
-#filter {
+#search {
   background-color: #103a51; /* typesafe blue */
   min-height: 5.5em;
   position: absolute;
@@ -102,24 +102,20 @@ textarea, input { outline: none; }
   z-index: 101;
 }
 
-#filter.scrolled {
-  box-shadow: 0 0 8px rgba(0,0,0,0.5);
-}
-
-#filter > h1 {
+#search > h1 {
   font-size: 2em;
   position: absolute;
   left: 0.25em;
   top: 0.5em;
 }
 
-#filter > h2 {
+#search > h2 {
   position: absolute;
   left: 3.8em;
   top: 3em;
 }
 
-#filter > img.scala-logo {
+#search > img.scala-logo {
   width: 3em;
   height: auto;
   position: absolute;
@@ -127,7 +123,7 @@ textarea, input { outline: none; }
   top: 0.43em;
 }
 
-#filter > span.toggle-sidebar {
+#search > span.toggle-sidebar {
   position: absolute;
   top: 0.8em;
   left: 0.2em;
@@ -137,12 +133,21 @@ textarea, input { outline: none; }
   height: 1.5em;
 }
 
-#filter > span.toggle-sidebar:hover {
+#search > span#doc-title {
+  color: #fff;
+  position: absolute;
+  top: 0.8em;
+  left: 0;
+  width: 18em;
+  text-align: center;
+}
+
+#search > span.toggle-sidebar:hover {
   cursor: pointer;
 }
 
 /* Pseudo element replacing UTF8-symbol "Trigram From Heaven" */
-#filter > span.toggle-sidebar:before {
+#search > span.toggle-sidebar:before {
   position: absolute;
   top: -0.45em;
   left: 0.45em;
@@ -153,7 +158,7 @@ textarea, input { outline: none; }
   box-shadow: 0 0.8em 0 1px #fff, 0 1.1em 0 1px #fff, 0 1.4em 0 1px #fff;
 }
 
-#filter > span.toggle-sidebar:hover:before {
+#search > span.toggle-sidebar:hover:before {
   -webkit-box-shadow: 0 0.8em 0 1px #c2c2c2, 0 1.1em 0 1px #c2c2c2, 0 1.4em 0 1px #c2c2c2;
   box-shadow: 0 0.8em 0 1px #c2c2c2, 0 1.1em 0 1px #c2c2c2, 0 1.4em 0 1px #c2c2c2;
 }
@@ -168,17 +173,20 @@ textarea, input { outline: none; }
 }
 
 #textfilter {
-  position: relative;
+  position: absolute;
+  top: 0.5em;
+  bottom: 0.8em;
+  left: 0;
+  right: 0;
   display: block;
-  height: 20px;
-  width: 80%;
-  max-width: 38em;
-  margin: 0.5em auto 0.8em auto;
+  height: 2em;
 }
 
 #textfilter > .input {
   display: block;
   padding: 0.2em;
+  max-width: 38em;
+  margin: 0 auto;
 }
 
 #textfilter > span.toggle {
@@ -246,11 +254,13 @@ textarea, input { outline: none; }
   font-size: 0.9em;
   position: relative;
   text-align: center;
-  display: block;
+  display: none;
   padding: 0.6em;
   background-color: #f16665;
   color: #fff;
-  margin-top: 0.65em;
+  margin: 3.9em 0.55em 0 0.35em;
+  border-radius: 0.2em;
+  z-index: 1;
 }
 
 #focusfilter .focuscoll {
@@ -268,7 +278,7 @@ textarea, input { outline: none; }
   z-index: 99;
   bottom: 0.5em;
   left: 0;
-  width: 16.75em;
+  width: 17.25em;
 }
 
 #kindfilter {
@@ -328,8 +338,8 @@ textarea, input { outline: none; }
   padding-top: 0.3em;
 }
 
-#tpl.packfocused {
-  top: 9.5em !important;
+#tpl.packfocused ol:nth-child(1) {
+  margin-top: 1.5em !important;
 }
 
 #tpl .packfocus,
@@ -348,7 +358,7 @@ textarea, input { outline: none; }
 
 #tpl .packages {
   width: 100%;
-  padding-top: 0.5em;
+  padding-top: 0.3em;
   padding-left: 0;
   overflow-x: hidden;
 }
@@ -471,23 +481,6 @@ textarea, input { outline: none; }
   width: 100%;
 }
 
-.ui-layout-pane {
-  background: #FFF;
-  overflow: auto;
-}
-
-.ui-layout-resizer {
-  background-color: #ededee; /* light gray */
-  border:1px solid #bbbbbb;
-  border-top:0;
-  border-bottom:0;
-  border-left: 0;
-}
-
-.ui-layout-toggler {
-  background: #AAA;
-}
-
 div#search-results {
   color: #103a51;
   position: absolute;
@@ -502,46 +495,47 @@ div#search-results {
   padding: 1em;
 }
 
-div#search-results > span.close-results {
+div#search > span.close-results {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   position: fixed;
-  top: 0.9em;
+  top: 0.8em;
   left: 1em;
   color: #fff;
+  display: none;
 }
 
-div#search-results > span.close-results:hover {
+div#search > span.close-results:hover {
   cursor: pointer;
 }
 
-div#search-results > span.search-text {
+div#results-content > span.search-text {
   font-size: 1.2em;
 }
 
-div#search-results > span.search-text > span.query-str {
+div#results-content > span.search-text > span.query-str {
   font-weight: 900;
 }
 
-div#search-results > h1.package {
+div#results-content > h1.package {
   font-size: 1em;
   margin: 1em 0;
   color: #f16665;
 }
 
-div#search-results > ul.entities {
+div#results-content > ul.entities {
   list-style-type: none;
   padding-left: 0;
 }
 
-div#search-results > ul.entities > li {
+div#results-content > ul.entities > li {
   margin: 0.5em 0;
 }
 
-div#search-results > ul.entities > li > div.icon {
+div#results-content > ul.entities > li > div.icon {
   float: left;
   display: inline;
   height: 1em;
@@ -549,43 +543,43 @@ div#search-results > ul.entities > li > div.icon {
   margin: 0.23em 0.3em 0 0;
 }
 
-div#search-results > ul.entities > li > div.icon.class {
+div#results-content > ul.entities > li > div.icon.class {
   background: url("class.svg") no-repeat center;
   background-size: 1em 1em;
 }
 
-div#search-results > ul.entities > li > div.icon.trait {
+div#results-content > ul.entities > li > div.icon.trait {
   background: url("trait.svg") no-repeat center;
   background-size: 1em 1em;
 }
 
-div#search-results > ul.entities > li > div.icon.object {
+div#results-content > ul.entities > li > div.icon.object {
   background: url("object.svg") no-repeat center;
   background-size: 1em 1em;
 }
 
-div#search-results > ul.entities > li > span.entity {
+div#results-content > ul.entities > li > span.entity {
   font-size: 1.1em;
   font-weight: 900;
 }
 
-div#search-results > ul.entities > li > ul.members {
+div#results-content > ul.entities > li > ul.members {
   margin-top: 0.5em;
   list-style-type: none;
   font-size: 0.85em;
 }
 
-div#search-results > ul.entities > li > ul.members > li {
+div#results-content > ul.entities > li > ul.members > li {
   margin: 0.25em 0;
 }
 
-div#search-results > ul.entities > li > ul.members >  li > span.kind,
-div#search-results > ul.entities > li > ul.members >  li > span.tail {
+div#results-content > ul.entities > li > ul.members >  li > span.kind,
+div#results-content > ul.entities > li > ul.members >  li > span.tail {
   margin-right: 0.6em;
   font-family: "Source Code Pro";
 }
 
-div#search-results > ul.entities > li > ul.members >  li > a.label {
+div#results-content > ul.entities > li > ul.members >  li > a.label {
   color: #2C3D9B;
   font-family: "Source Code Pro";
 }
@@ -687,4 +681,19 @@ div#search-results > ul.entities > li > ul.members >  li > a.label {
 /* CSS Hack for IE6 3 pixel bug */
 * html .jspCorner {
   margin: 0 -3px 0 0;
+}
+
+/* Media query rules for smaller viewport */
+@media only screen /* Large screen with a small window */
+and (max-width: 1200px)
+{
+  #textfilter {
+    left: 17.8em;
+    right: 0.35em;
+  }
+
+  #textfilter .input {
+    max-width: none;
+    margin: 0;
+  }
 }

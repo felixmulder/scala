@@ -17,13 +17,9 @@ var scrollPaneApi = undefined;
 
 $(document).ready(function() {
     /* check if browser is mobile, if so hide class nav */
-    if( /Android|webOS|Mobi|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+    if(isMobile()) {
         $("#browser").toggleClass("full-screen");
         $("#content").toggleClass("full-screen");
-    } else {
-        setTimeout(function () {
-            scrollPaneApi = initialiseScroll();
-        }, 1500);
     }
 
     $('iframe').bind("load", function(){
@@ -369,15 +365,16 @@ function keyboardScrolldownLeftPane() {
 var callingSearch = false;
 function configureTextFilter() {
     scheduler.add("init", function() {
-        $("#filter").prepend("<span class='toggle-sidebar'></span>");
+        $("#search").prepend("<span class='toggle-sidebar'></span>");
         $("#textfilter").append("<span class='input'><input placeholder='Search' id='index-input' type='text' accesskey='/'/></span><span class='clear'>✖</span>");
         var input = $("#textfilter input");
-        resizeFilterBlock();
         input.bind('keyup', function(event) {
             if (event.keyCode == 27) { // escape
                 input.attr("value", "");
                 $("div#search-results").hide();
-                $("#filter > span.toggle-sidebar").show();
+                $("#search > span.close-results").hide();
+                $("#search > span.toggle-sidebar").show();
+                $("#search > span#doc-title").show();
             } else if (event.keyCode == 13) {
                 input.blur();
             }
@@ -415,29 +412,26 @@ function configureTextFilter() {
         $("#textfilter > .clear").click(function() {
             $("#textfilter input").attr("value", "");
             $("div#search-results").hide();
-            $("#filter > span.toggle-sidebar").show();
+            $("#search > span.close-results").hide();
+            $("#search > span.toggle-sidebar").show();
+            $("#search > span#doc-title").show();
             //textFilter();
         });
-        $("#filter > span.toggle-sidebar").click(function() {
+        $("#search > span.toggle-sidebar").click(function() {
             $("#browser").toggleClass("full-screen");
             $("#content").toggleClass("full-screen");
             $(".packages").toggle();
             $("#letters").toggle();
             $("#kindfilter").toggle();
         });
-        $(".pack").scroll(function() {
-            var scroll = $(".pack").scrollTop();
-            if (scroll > 0)
-                $("#filter").addClass("scrolled");
-            else
-                $("#filter").removeClass("scrolled");
-        });
     });
 
     scheduler.add("init", function() {
-        $("div#search-results > span.close-results").click(function() {
+        $("div#search > span.close-results").click(function() {
             $("div#search-results").hide();
-            $("#filter > span.toggle-sidebar").show();
+            $("#search > span.close-results").hide();
+            $("#search > span.toggle-sidebar").show();
+            $("#search > span#doc-title").show();
             $("#textfilter input").attr("value", "");
         });
     });
@@ -459,6 +453,9 @@ function compilePattern(query) {
 // Filters all focused templates and packages. This function should be made less-blocking.
 //   @param query The string of the query
 function textFilter() {
+    if (scrollPaneApi)
+        scrollPaneApi.destroy();
+
     var query = $("#textfilter input").attr("value") || '';
     var queryRegExp = compilePattern(query);
 
@@ -521,6 +518,10 @@ function textFilter() {
 
         scheduler.add('filter', searchLoop);
     }
+
+    scheduler.scheduleLast("filter", function () {
+        scrollPaneApi = initialiseScroll();
+    });
 }
 
 /* Configures the hide tool by adding the hide link to all packages. */
@@ -548,20 +549,13 @@ function configureHideFilter() {
 function configureFocusFilter() {
     scheduler.add("init", function() {
         focusFilterState = null;
-        if ($("#focusfilter").length == 0) {
-            $("#filter").append("<div id='focusfilter'>focused on <span class='focuscoll'></span> <a class='focusremove'>✖</a></div>");
-            $("#focusfilter > .focusremove").click(function(event) {
-                textFilter();
-
-                $("#focusfilter").hide();
-                $("#kindfilter").show();
-                $("#tpl").removeClass("packfocused");
-                resizeFilterBlock();
-                focusFilterState = null;
-            });
+        $("#focusfilter > .focusremove").click(function(event) {
+            textFilter();
             $("#focusfilter").hide();
-            resizeFilterBlock();
-        }
+            $("#kindfilter").show();
+            $("#tpl").removeClass("packfocused");
+            focusFilterState = null;
+        });
     });
     scheduler.add("init", function() {
         $('#tpl li.pack a.packfocus').click(function () {
@@ -583,7 +577,6 @@ function focusFilter(package) {
 
     $("#focusfilter").show();
     $("#kindfilter").hide();
-    resizeFilterBlock();
     focusFilterState = currentFocus;
     kindFilterSync();
 
@@ -593,15 +586,13 @@ function focusFilter(package) {
 function configureKindFilter() {
     scheduler.add("init", function() {
         kindFilterState = "all";
-        $("#filter").append("<div id='kindfilter-container'><div id='kindfilter'><span>Fold All</span></div></div>");
+        $("#search").append("<div id='kindfilter-container'><div id='kindfilter'><span>Fold All</span></div></div>");
 
         $("#kindfilter").unbind("click");
         $("#kindfilter").click(function(event) {
             $("#kindfilter").toggleClass("open");
             kindFilter("packs");
-            scrollPaneApi.destroy();
         });
-        resizeFilterBlock();
     });
 }
 
@@ -614,7 +605,6 @@ function kindFilter(kind) {
         $("#kindfilter").click(function(event) {
             $("#kindfilter").toggleClass("open");
             kindFilter("all");
-            scrollPaneApi = initialiseScroll();
         });
     }
     else {
@@ -625,7 +615,6 @@ function kindFilter(kind) {
         $("#kindfilter").click(function(event) {
             $("#kindfilter").toggleClass("open");
             kindFilter("packs");
-            scrollPaneApi.destroy();
         });
     }
 }
@@ -639,10 +628,6 @@ function kindFilterSync() {
         $("#tpl a.packhide").text('show');
         $("#tpl ol.templates").hide();
     }
-}
-
-function resizeFilterBlock() {
-    $("#tpl").css("top", $("#filter").outerHeight(true));
 }
 
 /** Searches packages for entites matching the search query using a regex
@@ -692,7 +677,9 @@ function handleNonMatchingEntry(entity, ul, regExp, packageH1) {
 
             $(entityUrl).click(function() {
                 $("div#search-results").hide();
-                $("#filter > span.toggle-sidebar").show();
+                $("#search > span.close-results").hide();
+                $("#search > span.toggle-sidebar").show();
+                $("#search > span#doc-title").show();
             });
 
             nameElem.appendChild(entityUrl);
@@ -742,9 +729,11 @@ function insertSorted(ul, li) {
 function handleSearchedPackage(pack, regExp) {
     pack.then(function(res) {
         $("div#search-results").show();
-        $("#filter > span.toggle-sidebar").hide();
+        $("#search > span.close-results").show();
+        $("#search > span.toggle-sidebar").hide();
+        $("#search > span#doc-title").hide();
 
-        var searchRes = document.getElementById("search-results")
+        var searchRes = document.getElementById("results-content")
         var h1 = document.createElement("h1");
         h1.className = "package";
         h1.appendChild(document.createTextNode(res.package));
@@ -801,7 +790,9 @@ function searchEntity(entity, ul, regExp) {
 
             $(label).click(function() {
                 $("div#search-results").hide();
-                $("#filter > span.toggle-sidebar").show();
+                $("#search > span.close-results").hide();
+                $("#search > span.toggle-sidebar").show();
+                $("#search > span#doc-title").show();
                 $("#textfilter input").attr("value", "");
             });
 
@@ -842,7 +833,9 @@ function listItem(entity, regExp) {
 
     $(entityUrl).click(function() {
         $("div#search-results").hide();
-        $("#filter > span.toggle-sidebar").show();
+        $("#search > span.close-results").hide();
+        $("#search > span.toggle-sidebar").show();
+        $("#search > span#doc-title").show();
         $("#textfilter input").attr("value", "");
     });
 
@@ -875,18 +868,16 @@ function searchAll() {
 
     if (searchStr === '') {
         $("div#search-results").hide();
-        $("#filter > span.toggle-sidebar").show();
+        $("#search > span.close-results").hide();
+        $("#search > span.toggle-sidebar").show();
+        $("#search > span#doc-title").show();
         return;
     }
 
     // Clear input field and results so as not to doubly display data
-    //$("#textfilter input").val('');
-    //textFilter();
-    $("div#search-results > .package").remove();
-    $("div#search-results > .entities").remove();
-    $("div#search-results > span.search-text").remove();
+    $("div#search-results > div#results-content").html("");
 
-    $("div#search-results")
+    $("div#results-content")
         .prepend("<span class='search-text'>"
                 +"  Showing results for <span class='query-str'>\"" + searchStr + "\"</span>"
                 +"</span>");
@@ -903,8 +894,11 @@ function searchAll() {
 
 function initialiseScroll() {
     return $("#tpl").jScrollPane({
-        autoReinitialise: true,
         contentWidth: '0px',
         verticalDragMinHeight: 140,
     }).data().jsp;
+}
+
+function isMobile() {
+    return /Android|webOS|Mobi|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }

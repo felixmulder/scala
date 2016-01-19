@@ -68,4 +68,25 @@ function Scheduler() {
             scheduler.queues[idx] = new Array();
         }
     }
+
+    this.queueEmpty = function(label) {
+        var idx = 0;
+        while (idx < scheduler.labels.length && scheduler.labels[idx].name != label)
+            idx++;
+
+        if (idx < scheduler.queues.length && scheduler.labels[idx].name == label) {
+            return scheduler.queues[idx].length == 0;
+        }
+        else throw("queue for label '" + label  + "' is non existant");
+    }
+
+    this.scheduleLast = function(label, fn) {
+        if (scheduler.queueEmpty(label)) {
+            fn();
+        } else {
+            scheduler.add(label, function() {
+                scheduler.scheduleLast(label, fn);
+            });
+        }
+    }
 };

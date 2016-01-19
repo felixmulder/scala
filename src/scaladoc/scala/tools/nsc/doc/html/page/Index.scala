@@ -38,9 +38,9 @@ class Index(universe: doc.Universe, val index: doc.Index) extends HtmlPage {
     <body>
       { browser }
       <div id="search-results">
-        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="results-content"></div>
       </div>
-      <div id="content" class="ui-layout-center">
+      <div id="content">
         <iframe id="template" name="template" src={ relativeLinkTo{List("package.html")} }/>
       </div>
     </body>
@@ -67,10 +67,15 @@ class Index(universe: doc.Universe, val index: doc.Index) extends HtmlPage {
 
   def browser =
     <xml:group>
-      <div id="filter">
+      <div id="search">
+          <span id="doc-title">{universe.settings.doctitle.value}</span>
+          <span class="close-results"><span class="left">&lt;</span> Back</span>
           <div id="textfilter"></div>
       </div>
-      <div id="browser" class="ui-layout-west">
+      <div id="browser">
+        <div id='focusfilter'>
+          focused on <span class='focuscoll'></span> <a class='focusremove'>✖</a>
+        </div>
         <div class="pack" id="tpl">{
           def packageElem(pack: model.Package): NodeSeq = {
             <xml:group>
