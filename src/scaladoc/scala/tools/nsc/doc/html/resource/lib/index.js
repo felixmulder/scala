@@ -332,6 +332,7 @@ function keyboardScrolldownLeftPane() {
                 var href = $old.attr("href");
                 location.replace(href);
                 $old.click();
+                $("#textfilter input").attr("value", "");
                 break;
 
             case 38: // up
