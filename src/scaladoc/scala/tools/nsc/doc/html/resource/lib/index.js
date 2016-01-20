@@ -46,6 +46,7 @@ $(document).ready(function() {
     scheduler.addLabel("init", 1);
     scheduler.addLabel("focus", 2);
     scheduler.addLabel("filter", 4);
+    scheduler.addLabel("search", 5);
 
     prepareEntityList();
     configureTextFilter();
@@ -297,7 +298,7 @@ function prepareEntityList() {
 /* Handles all key presses while scrolling around with keyboard shortcuts in left panel */
 function keyboardScrolldownLeftPane() {
 
-    var DEndedIterator = function (items) {
+    var EntityIterator = function (items) {
         var it = this;
         this.index = -1;
         this.items = items;
@@ -315,7 +316,7 @@ function keyboardScrolldownLeftPane() {
 
     scheduler.add("init", function() {
         $("#textfilter input").blur();
-        var items = new DEndedIterator(
+        var items = new EntityIterator(
             $("div#results-content > ul.entities span.entity > a").toArray()
         );
 
@@ -357,6 +358,7 @@ function configureTextFilter() {
     scheduler.add("init", function() {
         $("#search").prepend("<span class='toggle-sidebar'></span>");
         var input = $("#textfilter input");
+        // token used to cancel running search
         input.bind('keyup', function(event) {
             if (event.keyCode == 27) { // escape
                 input.attr("value", "");
@@ -370,14 +372,7 @@ function configureTextFilter() {
                 return false;
             }
 
-            // Don't call search immediately to let the user type some letters
-            setTimeout(function() {
-                if (!callingSearch) {
-                    callingSearch = true;
-                    searchAll();
-                    callingSearch = false;
-                }
-            }, 500);
+            searchAll();
         });
     });
     scheduler.add("init", function() {
@@ -491,7 +486,10 @@ function textFilter() {
     }
 
     scheduler.scheduleLast("filter", function () {
-        scrollPaneApi = initialiseScroll();
+        scrollPaneApi = $("#tpl").jScrollPane({
+            contentWidth: '0px',
+            verticalDragMinHeight: 140,
+        }).data().jsp;
     });
 }
 
@@ -606,19 +604,25 @@ function kindFilterSync() {
  * @return {Promise} a promise containing {"matched": [], "notMatching": [], package: String}
  */
 function searchPackage(pack, regExp) {
-    return new Promise(function(resolve, reject) {
+    scheduler.add("search", function() {
         var entities = Index.PACKAGES[pack];
         var matched = [];
         var notMatching = [];
+
 
         entities.forEach(function (elem) {
             regExp.test(elem.name) ? matched.push(elem) : notMatching.push(elem);
         });
 
-        resolve({
+        var results = {
             "matched": matched,
             "notMatching": notMatching,
             "package": pack
+        };
+
+
+        scheduler.add("search", function() {
+            handleSearchedPackage(results, regExp);
         });
     });
 }
@@ -691,44 +695,39 @@ function insertSorted(ul, li) {
  *
  * It will search all entities which matched the regExp.
  *
- * @param {Promise} pack: this is the searched package. It will contain the map
+ * @param {Object} res: this is the searched package. It will contain the map
  * from the `searchPackage`function.
  * @param {RegExp} regExp
  */
-function handleSearchedPackage(pack, regExp) {
-    pack.then(function(res) {
-        $("div#search-results").show();
-        $("#search > span.close-results").show();
-        $("#search > span.toggle-sidebar").hide();
-        $("#search > span#doc-title").hide();
+function handleSearchedPackage(res, regExp) {
+    $("div#search-results").show();
+    $("#search > span.close-results").show();
+    $("#search > span.toggle-sidebar").hide();
+    $("#search > span#doc-title").hide();
 
-        var searchRes = document.getElementById("results-content")
-        var h1 = document.createElement("h1");
-        h1.className = "package";
-        h1.appendChild(document.createTextNode(res.package));
+    var searchRes = document.getElementById("results-content")
+    var h1 = document.createElement("h1");
+    h1.className = "package";
+    h1.appendChild(document.createTextNode(res.package));
 
-        if (res.matched.length == 0)
-            h1.style.display = "none";
+    if (res.matched.length == 0)
+        h1.style.display = "none";
 
-        searchRes.appendChild(h1);
+    searchRes.appendChild(h1);
 
-        var ul = document.createElement("ul")
-        ul.className = "entities";
+    var ul = document.createElement("ul")
+    ul.className = "entities";
 
-        // Generate html list items from results
-        res.matched
-           .map(function(entity) { return listItem(entity, regExp); })
-           .forEach(function(li) { ul.appendChild(li); });
+    // Generate html list items from results
+    res.matched
+       .map(function(entity) { return listItem(entity, regExp); })
+       .forEach(function(li) { ul.appendChild(li); });
 
-        // Generate html (potentially) for items not matching the regExp
-        res.notMatching
-           .forEach(function(entity) { handleNonMatchingEntry(entity, ul, regExp, h1); });
+    // Generate html (potentially) for items not matching the regExp
+    res.notMatching
+       .forEach(function(entity) { handleNonMatchingEntry(entity, ul, regExp, h1); });
 
-        searchRes.appendChild(ul);
-    })
-    .catch(function(err) {
-        console.log(err);
-    });
+    searchRes.appendChild(ul);
 }
 
 /** Searches an entity asynchronously for regExp matches in an entity's members
@@ -830,9 +829,10 @@ function listItem(entity, regExp) {
 /** Searches all packages and entities for the current search string in
  *  the input field "#textfilter"
  *
- *  Then shows the results in div#search-results
+ * Then shows the results in div#search-results
  */
 function searchAll() {
+    scheduler.clear("search"); // clear previous search
     var searchStr = $("#textfilter input").attr("value").trim() || '';
 
     if (searchStr === '') {
@@ -857,15 +857,7 @@ function searchAll() {
     Index
         .keys(Index.PACKAGES)
         .sort()
-        .map(function(elem) { return searchPackage(elem, regExp); })
-        .map(function(elem) { handleSearchedPackage(elem, regExp); });
-}
-
-function initialiseScroll() {
-    return $("#tpl").jScrollPane({
-        contentWidth: '0px',
-        verticalDragMinHeight: 140,
-    }).data().jsp;
+        .forEach(function(elem) { searchPackage(elem, regExp); })
 }
 
 function isMobile() {
