@@ -20,6 +20,7 @@ $(document).ready(function() {
     if(isMobile()) {
         $("#browser").toggleClass("full-screen");
         $("#content").toggleClass("full-screen");
+        $("#kindfilter").toggle();
     }
 
     $('iframe').bind("load", function(){
@@ -440,8 +441,6 @@ function configureTextFilter() {
         $("#search > span.toggle-sidebar").click(function() {
             $("#browser").toggleClass("full-screen");
             $("#content").toggleClass("full-screen");
-            $(".packages").toggle();
-            $("#letters").toggle();
             $("#kindfilter").toggle();
         });
     });
@@ -540,10 +539,12 @@ function textFilter() {
     }
 
     scheduler.scheduleLast("filter", function () {
-        scrollPaneApi = $("#tpl").jScrollPane({
-            contentWidth: '0px',
-            verticalDragMinHeight: 140,
-        }).data().jsp;
+        if (!isMobile()) {
+            scrollPaneApi = $("#tpl").jScrollPane({
+                contentWidth: '0px',
+                verticalDragMinHeight: 140,
+            }).data().jsp;
+        }
     });
 }
 

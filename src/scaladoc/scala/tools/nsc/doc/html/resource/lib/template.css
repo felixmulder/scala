@@ -1110,11 +1110,6 @@ only screen /* iPhone 6 */
 and (max-device-width: 667px)
 and (-webkit-device-pixel-ratio: 2)
 {
-  #definition {
-    min-height: 0 !important;
-    height: 4em !important;
-  }
-
   #signature {
     font-size: 0.7em;
   }
@@ -1129,10 +1124,6 @@ and (-webkit-device-pixel-ratio: 2)
 
   #definition #owner {
     padding-top: 0.7em;
-  }
-
-  div.fullcommenttop {
-    margin-top: 11.6em;
   }
 
   #template .shortcomment {

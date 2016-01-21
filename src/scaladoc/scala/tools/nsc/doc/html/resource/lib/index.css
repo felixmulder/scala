@@ -92,7 +92,7 @@ textarea, input { outline: none; }
 }
 
 #browser.full-screen {
-  left: -15em;
+  left: -17.5em;
 }
 
 #search {
@@ -708,5 +708,32 @@ and (max-width: 1200px)
   #textfilter .input {
     max-width: none;
     margin: 0;
+  }
+}
+
+/* Media query rules specifically for mobile devices */
+@media
+screen /* HiDPI device like Nexus 5 */
+and (max-device-width: 360px)
+and (max-device-height: 640px)
+and (-webkit-device-pixel-ratio: 3)
+,
+screen /* Most mobile devices  */
+and (max-device-width: 480px)
+and (orientation: portrait)
+,
+only screen /* iPhone 6 */
+and (max-device-width: 667px)
+and (-webkit-device-pixel-ratio: 2)
+{
+  #search > span#doc-title {
+    width: 100%;
+    text-align: left;
+    padding-left: 2em;
+    top: 0.97em;
+  }
+
+  #textfilter {
+    left: 12.2em;
   }
 }
