@@ -295,48 +295,59 @@ function prepareEntityList() {
         .prepend("<a class='packfocus'>focus</a>");
 }
 
-/* Handles all key presses while scrolling around with keyboard shortcuts in left panel */
-function keyboardScrolldownLeftPane() {
-
+/* Handles all key presses while scrolling around with keyboard shortcuts in search results */
+function handleKeyNavigation() {
+    /** Iterates both back and forth among selected elements */
     var EntityIterator = function (items) {
         var it = this;
         this.index = -1;
         this.items = items;
 
+        /** Returns the next entry - if trying to select past last element, it
+         * returns the last element
+         */
         it.next = function() {
             it.index = Math.min(it.items.length - 1, it.index + 1);
             return $(it.items[it.index]);
         };
 
+        /** Returns the previous entry - will return `undefined` instead if
+         * selecting up from first element
+         */
         it.prev = function() {
             it.index = Math.max(-1, it.index - 1);
             return it.index == -1 ? undefined : $(it.items[it.index]);
         };
     };
 
+    /** Scroll helper, ensures that the selected elem is inside the viewport */
     var Scroller = function ($container) {
         scroller = this;
         scroller.container = $container;
 
-        /** Returns true if `$elem` is outside viewport */
         scroller.scrollDown = function($elem) {
-            var yPos = $elem.offset().top;
-            if ($container.scrollTop() + $container.height() < yPos) {
+            var yPos = $elem.offset().top; // offset relative to viewport
+            if ($container.height() < yPos) {
                 $container.animate({
-                    scrollTop: yPos
+                    scrollTop: $container.scrollTop() + yPos - $("#search").height() - 10
                 }, 200);
             }
         };
 
         scroller.scrollUp = function ($elem) {
-            var yPos = $elem.offset().top;
-
-            if ($container.scrollTop() > yPos) {
+            var yPos = $elem.offset().top; // offset relative to viewport
+            if (yPos < $("#search").height()) {
                 $container.animate({
-                    scrollTop: yPos
+                    scrollTop: $container.scrollTop() + yPos - $("#search").height() - 10
                 }, 200);
             }
         };
+
+        scroller.scrollTop = function() {
+            $container.animate({
+                scrollTop: 0
+            }, 200);
+        }
     };
 
     scheduler.add("init", function() {
@@ -370,6 +381,7 @@ function keyboardScrolldownLeftPane() {
                 if ($old === undefined) {
                     $(window).unbind("keydown");
                     $("#textfilter input").focus();
+                    scroller.scrollTop();
                     return false;
                 } else {
                     $old.addClass("selected");
@@ -410,7 +422,7 @@ function configureTextFilter() {
 
                 case 40: // down arrow
                     $(window).unbind("keydown");
-                    keyboardScrolldownLeftPane();
+                    handleKeyNavigation();
                     return false;
             }
 
