@@ -305,12 +305,37 @@ function keyboardScrolldownLeftPane() {
 
         it.next = function() {
             it.index = Math.min(it.items.length - 1, it.index + 1);
-            return it.items[it.index];
+            return $(it.items[it.index]);
         };
 
         it.prev = function() {
-            it.index = Math.max(0, it.index - 1);
-            return it.items[it.index];
+            it.index = Math.max(-1, it.index - 1);
+            return it.index == -1 ? undefined : $(it.items[it.index]);
+        };
+    };
+
+    var Scroller = function ($container) {
+        scroller = this;
+        scroller.container = $container;
+
+        /** Returns true if `$elem` is outside viewport */
+        scroller.scrollDown = function($elem) {
+            var yPos = $elem.offset().top;
+            if ($container.scrollTop() + $container.height() < yPos) {
+                $container.animate({
+                    scrollTop: yPos
+                }, 200);
+            }
+        };
+
+        scroller.scrollUp = function ($elem) {
+            var yPos = $elem.offset().top;
+
+            if ($container.scrollTop() > yPos) {
+                $container.animate({
+                    scrollTop: yPos
+                }, 200);
+            }
         };
     };
 
@@ -320,13 +345,15 @@ function keyboardScrolldownLeftPane() {
             $("div#results-content > ul.entities span.entity > a").toArray()
         );
 
-        var $old = $(items.next());
-        $old.addClass('selected');
+        var scroller = new Scroller($("#search-results"));
+
+        var $old = items.next();
+        $old.addClass("selected");
 
         $(window).bind("keydown", function(e) {
             switch ( e.keyCode ) {
             case 9: // tab
-                $old.removeClass('selected');
+                $old.removeClass("selected");
                 break;
 
             case 13: // enter
@@ -338,14 +365,23 @@ function keyboardScrolldownLeftPane() {
 
             case 38: // up
                 $old.removeClass('selected');
-                $old = $(items.prev());
-                $old.addClass('selected');
+                $old = items.prev();
+
+                if ($old === undefined) {
+                    $(window).unbind("keydown");
+                    $("#textfilter input").focus();
+                    return false;
+                } else {
+                    $old.addClass("selected");
+                    scroller.scrollUp($old);
+                }
                 break;
 
             case 40: // down
-                $old.removeClass('selected');
-                $old = $(items.next());
-                $old.addClass('selected');
+                $old.removeClass("selected");
+                $old = items.next();
+                $old.addClass("selected");
+                scroller.scrollDown($old);
                 break;
             }
         });
@@ -360,16 +396,22 @@ function configureTextFilter() {
         var input = $("#textfilter input");
         // token used to cancel running search
         input.bind('keyup', function(event) {
-            if (event.keyCode == 27) { // escape
-                input.attr("value", "");
-                $("div#search-results").hide();
-                $("#search > span.close-results").hide();
-                $("#search > span.toggle-sidebar").show();
-                $("#search > span#doc-title").show();
-            } else if (event.keyCode == 40) { // down arrow
-                $(window).unbind("keydown");
-                keyboardScrolldownLeftPane();
-                return false;
+            switch ( event.keyCode ) {
+                case 27: // escape
+                    input.attr("value", "");
+                    $("div#search-results").hide();
+                    $("#search > span.close-results").hide();
+                    $("#search > span.toggle-sidebar").show();
+                    $("#search > span#doc-title").show();
+                    break;
+
+                case 38: // up arrow
+                    return false;
+
+                case 40: // down arrow
+                    $(window).unbind("keydown");
+                    keyboardScrolldownLeftPane();
+                    return false;
             }
 
             searchAll();
