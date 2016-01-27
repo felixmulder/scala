@@ -521,35 +521,42 @@ div#search > span.close-results:hover {
 }
 
 div#results-content {
-  max-width: 48em;
+  max-width: 1140px;
   margin: 0 auto;
-  width: 80%;
 }
 
 div#results-content > span.search-text {
   font-size: 1.2em;
+  float: left;
+  width: 100%;
 }
 
 div#results-content > span.search-text > span.query-str {
   font-weight: 900;
 }
 
-div#results-content > h1.package {
+div#results-content > div#entity-results,
+div#results-content > div#member-results {
+  float: left;
+  width: 50%;
+}
+
+div#results-content > div#entity-results > h1.package {
   font-size: 1em;
   margin: 1em 0;
   color: #f16665;
 }
 
-div#results-content > ul.entities {
+div#results-content > div#entity-results > ul.entities {
   list-style-type: none;
   padding-left: 0;
 }
 
-div#results-content > ul.entities > li {
+div#results-content > div#entity-results > ul.entities > li {
   margin: 0.5em 0;
 }
 
-div#results-content > ul.entities > li > div.icon {
+div#results-content > div#entity-results > ul.entities > li > div.icon {
   float: left;
   display: inline;
   height: 1em;
@@ -557,43 +564,43 @@ div#results-content > ul.entities > li > div.icon {
   margin: 0.23em 0.3em 0 0;
 }
 
-div#results-content > ul.entities > li > div.icon.class {
+div#results-content > div#entity-results > ul.entities > li > div.icon.class {
   background: url("class.svg") no-repeat center;
   background-size: 1em 1em;
 }
 
-div#results-content > ul.entities > li > div.icon.trait {
+div#results-content > div#entity-results > ul.entities > li > div.icon.trait {
   background: url("trait.svg") no-repeat center;
   background-size: 1em 1em;
 }
 
-div#results-content > ul.entities > li > div.icon.object {
+div#results-content > div#entity-results > ul.entities > li > div.icon.object {
   background: url("object.svg") no-repeat center;
   background-size: 1em 1em;
 }
 
-div#results-content > ul.entities > li > span.entity {
+div#results-content > div#entity-results > ul.entities > li > span.entity {
   font-size: 1.1em;
   font-weight: 900;
 }
 
-div#results-content > ul.entities > li > ul.members {
+div#results-content > div#entity-results > ul.entities > li > ul.members {
   margin-top: 0.5em;
   list-style-type: none;
   font-size: 0.85em;
 }
 
-div#results-content > ul.entities > li > ul.members > li {
+div#results-content > div#entity-results > ul.entities > li > ul.members > li {
   margin: 0.25em 0;
 }
 
-div#results-content > ul.entities > li > ul.members >  li > span.kind,
-div#results-content > ul.entities > li > ul.members >  li > span.tail {
+div#results-content > div#entity-results > ul.entities > li > ul.members >  li > span.kind,
+div#results-content > div#entity-results > ul.entities > li > ul.members >  li > span.tail {
   margin-right: 0.6em;
   font-family: "Source Code Pro";
 }
 
-div#results-content > ul.entities > li > ul.members >  li > a.label {
+div#results-content > div#entity-results > ul.entities > li > ul.members >  li > a.label {
   color: #2C3D9B;
   font-family: "Source Code Pro";
 }

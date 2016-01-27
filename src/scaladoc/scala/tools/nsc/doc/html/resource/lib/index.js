@@ -668,6 +668,7 @@ function searchPackage(pack, regExp) {
         var results = {
             "matched": matched,
             "notMatching": notMatching,
+            "all": entities,
             "package": pack
         };
 
@@ -755,7 +756,9 @@ function handleSearchedPackage(res, regExp) {
     $("#search > span.toggle-sidebar").hide();
     $("#search > span#doc-title").hide();
 
-    var searchRes = document.getElementById("results-content")
+    var searchRes = document.getElementById("results-content");
+    var entityDiv = document.getElementById("entity-results");
+
     var h1 = document.createElement("h1");
     h1.className = "package";
     h1.appendChild(document.createTextNode(res.package));
@@ -763,7 +766,7 @@ function handleSearchedPackage(res, regExp) {
     if (res.matched.length == 0)
         h1.style.display = "none";
 
-    searchRes.appendChild(h1);
+    entityDiv.appendChild(h1);
 
     var ul = document.createElement("ul")
     ul.className = "entities";
@@ -773,11 +776,8 @@ function handleSearchedPackage(res, regExp) {
        .map(function(entity) { return listItem(entity, regExp); })
        .forEach(function(li) { ul.appendChild(li); });
 
-    // Generate html (potentially) for items not matching the regExp
-    res.notMatching
-       .forEach(function(entity) { handleNonMatchingEntry(entity, ul, regExp, h1); });
-
-    searchRes.appendChild(ul);
+    entityDiv.appendChild(ul);
+    searchRes.appendChild(entityDiv);
 }
 
 /** Searches an entity asynchronously for regExp matches in an entity's members
@@ -871,7 +871,7 @@ function listItem(entity, regExp) {
     ul.className = "members";
 
     li.appendChild(ul);
-    searchEntity(entity, ul, regExp);
+    //searchEntity(entity, ul, regExp);
 
     return li;
 }
@@ -894,7 +894,13 @@ function searchAll() {
     }
 
     // Clear input field and results so as not to doubly display data
+    // TODO: clear children instead of results-content?
     $("div#search-results > div#results-content").html("");
+
+    //TODO: move to html gen
+    var entityResults = document.createElement("div");
+    entityResults.id = "entity-results";
+    document.getElementById("results-content").appendChild(entityResults);
 
     $("div#results-content")
         .prepend("<span class='search-text'>"
