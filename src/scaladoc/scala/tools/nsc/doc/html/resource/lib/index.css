@@ -535,9 +535,13 @@ div#results-content > span.search-text > span.query-str {
   font-weight: 900;
 }
 
-div#results-content > div#entity-results,
-div#results-content > div#member-results {
+div#results-content > div#entity-results {
   float: left;
+  width: 50%;
+}
+
+div#results-content > div#member-results {
+  float: right;
   width: 50%;
 }
 

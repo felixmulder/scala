@@ -661,14 +661,16 @@ function searchPackage(pack, regExp) {
         var matched = [];
         var notMatching = [];
 
+        scheduler.add("search", function() {
+            searchMembers(entities, regExp);
+        });
+
         entities.forEach(function (elem) {
             regExp.test(elem.name) ? matched.push(elem) : notMatching.push(elem);
         });
 
         var results = {
             "matched": matched,
-            "notMatching": notMatching,
-            "all": entities,
             "package": pack
         };
 
@@ -678,49 +680,15 @@ function searchPackage(pack, regExp) {
     });
 }
 
-function handleNonMatchingEntry(entity, ul, regExp, packageH1) {
-    var membersUl = document.createElement("ul");
-    searchEntity(entity, membersUl, regExp)
-        .then(function(res) {
-            if (res.length == 0) return;
-
-            packageH1.style.display = "block";
-
-            var name = entity.name.split('.').pop()
-            var nameElem = document.createElement("span");
-            nameElem.className = "entity";
-
-            var entityUrl = document.createElement("a");
-            entityUrl.title = name;
-            entityUrl.href = "#" + entity.name;
-
-            if (entity.kind == "object")
-                entityUrl.href += "$";
-
-            entityUrl.appendChild(document.createTextNode(name));
-
-            $(entityUrl).click(function() {
-                $("div#search-results").hide();
-                $("#search > span.close-results").hide();
-                $("#search > span.toggle-sidebar").show();
-                $("#search > span#doc-title").show();
-            });
-
-            nameElem.appendChild(entityUrl);
-
-            var iconElem = document.createElement("div");
-            iconElem.className = "icon " + entity.kind;
-
-            var li = document.createElement("li");
-            li.id = entity.name.replace(new RegExp("\\.", "g"),"-");
-            li.appendChild(iconElem);
-            li.appendChild(nameElem);
-
-            membersUl.className = "members";
-            li.appendChild(membersUl);
-
-            insertSorted(ul, li);
-        })
+function searchMembers(entities, regExp) {
+    entities.forEach(function(entity) {
+        //TODO: add members under an entity li
+        var membersUl = document.createElement("ul");
+        membersUl.className = "members";
+        searchEntity(entity, membersUl, regExp);
+        var memDiv = document.getElementById("member-results");
+        memDiv.appendChild(membersUl);
+    });
 }
 
 /** This function inserts `li` into the `ul` ordered by the li's id
@@ -871,7 +839,6 @@ function listItem(entity, regExp) {
     ul.className = "members";
 
     li.appendChild(ul);
-    //searchEntity(entity, ul, regExp);
 
     return li;
 }
@@ -901,6 +868,11 @@ function searchAll() {
     var entityResults = document.createElement("div");
     entityResults.id = "entity-results";
     document.getElementById("results-content").appendChild(entityResults);
+
+    var memberResults = document.createElement("div");
+    memberResults.id  = "member-results";
+    document.getElementById("results-content").appendChild(memberResults);
+
 
     $("div#results-content")
         .prepend("<span class='search-text'>"
