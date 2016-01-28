@@ -67,6 +67,8 @@ body {
   overflow-x: hidden;
   font-family: Arial, sans-serif;
   background-color: #f0f3f6;
+  max-width: 1140px;
+  margin: 5em auto 0;
 }
 
 html {
@@ -372,6 +374,7 @@ div.members > ol > li {
   color: #103a51;
   padding: 5px 0 5px;
   margin-bottom: 0.4em;
+  min-height: 2.8em;
 }
 
 div.members > ol >li.selected,

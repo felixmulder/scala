@@ -463,10 +463,10 @@ textarea, input { outline: none; }
 }
 
 #content {
-  right: 0px;
-  left: 17.5em;
-  bottom: 0px;
-  top: 3em;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  top: 0;
   position: fixed;
   display: block;
   overflow-y: auto;
