@@ -662,7 +662,7 @@ function searchPackage(pack, regExp) {
         var notMatching = [];
 
         scheduler.add("search", function() {
-            searchMembers(entities, regExp);
+            searchMembers(entities, regExp, pack);
         });
 
         entities.forEach(function (elem) {
@@ -680,14 +680,61 @@ function searchPackage(pack, regExp) {
     });
 }
 
-function searchMembers(entities, regExp) {
+function searchMembers(entities, regExp, pack) {
+    var memDiv = document.getElementById("member-results");
+    var h1 = document.createElement("h1");
+    h1.className = "package";
+    h1.appendChild(document.createTextNode(pack));
+    h1.style.display = "none";
+    memDiv.appendChild(h1);
+
+    var entityUl = document.createElement("ul");
+    entityUl.className = "entities";
+    memDiv.appendChild(entityUl);
+
     entities.forEach(function(entity) {
-        //TODO: add members under an entity li
+        var entityLi = document.createElement("li");
+
+        var iconElem = document.createElement("div");
+        iconElem.className = "icon " + entity.kind;
+        entityLi.appendChild(iconElem);
+
+        var name = entity.name.split('.').pop()
+        var nameElem = document.createElement("span");
+        nameElem.className = "entity";
+
+        var entityUrl = document.createElement("a");
+        entityUrl.title = name;
+        entityUrl.href = "#" + entity.name;
+
+        if (entity.kind == "object")
+            entityUrl.href += "$";
+
+        entityUrl.appendChild(document.createTextNode(name));
+
+        $(entityUrl).click(function() {
+            $("div#search-results").hide();
+            $("#search > span.close-results").hide();
+            $("#search > span.toggle-sidebar").show();
+            $("#search > span#doc-title").show();
+            $("#textfilter input").attr("value", "");
+        });
+
+        nameElem.appendChild(entityUrl);
+        entityLi.appendChild(nameElem);
+
         var membersUl = document.createElement("ul");
         membersUl.className = "members";
-        searchEntity(entity, membersUl, regExp);
-        var memDiv = document.getElementById("member-results");
-        memDiv.appendChild(membersUl);
+        entityLi.appendChild(membersUl);
+
+
+        searchEntity(entity, membersUl, regExp)
+            .then(function(res) {
+                if (res.length > 0) {
+                    h1.style.display = "block";
+                    entityUl.appendChild(entityLi);
+                }
+            });
     });
 }
 
@@ -861,18 +908,26 @@ function searchAll() {
     }
 
     // Clear input field and results so as not to doubly display data
-    // TODO: clear children instead of results-content?
     $("div#search-results > div#results-content").html("");
 
-    //TODO: move to html gen
+    var resDiv = document.getElementById("results-content");
     var entityResults = document.createElement("div");
     entityResults.id = "entity-results";
-    document.getElementById("results-content").appendChild(entityResults);
+    var entityH1 = document.createElement("h1");
+    entityH1.className = "result-type";
+    entityH1.innerHTML = "Entity results";
+    entityResults.appendChild(entityH1);
+
+    resDiv.appendChild(entityResults);
 
     var memberResults = document.createElement("div");
     memberResults.id  = "member-results";
-    document.getElementById("results-content").appendChild(memberResults);
+    var memberH1 = document.createElement("h1");
+    memberH1.className = "result-type";
+    memberH1.innerHTML = "Member results";
+    memberResults.appendChild(memberH1);
 
+    resDiv.appendChild(memberResults);
 
     $("div#results-content")
         .prepend("<span class='search-text'>"
