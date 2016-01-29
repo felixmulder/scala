@@ -71,14 +71,6 @@ object Test extends Properties("Index") {
       case None => false
     }
   }
-  property("browser contains a script element") = {
-    createIndex("src/scaladoc/scala/tools/nsc/doc/html/page/Index.scala") match {
-      case Some(index) =>
-        (index.browser \ "script").size == 1
-
-      case None => false
-    }
-  }
   property("package objects in index") = {
     createIndex("test/scaladoc/resources/SI-5558.scala") match {
       case Some(index) =>
