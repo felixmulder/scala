@@ -35,7 +35,10 @@ class Index(universe: doc.Universe, val index: doc.Index) extends HtmlPage {
     <body>
       { search }
       <div id="search-results">
-        <div id="results-content"></div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
       </div>
       <div id="content">
         <iframe id="template" name="template" src={ relativeLinkTo{List("package.html")} }/>

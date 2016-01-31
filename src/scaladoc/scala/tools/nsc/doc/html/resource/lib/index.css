@@ -548,12 +548,14 @@ div#results-content > div#entity-results {
   float: left;
   width: 50%;
   padding: 1em;
+  display: inline;
 }
 
 div#results-content > div#member-results {
-  float: right;
+  float: left;
   width: 50%;
   padding: 1em;
+  display: inline;
 }
 
 div#results-content > div#member-results > h1.package,
@@ -744,6 +746,20 @@ and (max-width: 1200px)
   #textfilter .input {
     max-width: none;
     margin: 0;
+  }
+}
+
+@media only screen /* Large screen with a smaller window */
+and (max-width: 800px)
+{
+  div#results-content > div#entity-results {
+    width: 100%;
+    padding: 0em;
+  }
+
+  div#results-content > div#member-results {
+    width: 100%;
+    padding: 0em;
   }
 }
 

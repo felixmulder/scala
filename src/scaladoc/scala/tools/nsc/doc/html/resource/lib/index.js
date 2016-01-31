@@ -253,7 +253,6 @@ function configureTextFilter() {
                     input.attr("value", "");
                     $("div#search-results").hide();
                     $("#search > span.close-results").hide();
-                    $("#search > span.toggle-sidebar").show();
                     $("#search > span#doc-title").show();
                     break;
 
@@ -274,7 +273,6 @@ function configureTextFilter() {
             $("#textfilter input").attr("value", "");
             $("div#search-results").hide();
             $("#search > span.close-results").hide();
-            $("#search > span.toggle-sidebar").show();
             $("#search > span#doc-title").show();
         });
     });
@@ -283,7 +281,6 @@ function configureTextFilter() {
         $("div#search > span.close-results").click(function() {
             $("div#search-results").hide();
             $("#search > span.close-results").hide();
-            $("#search > span.toggle-sidebar").show();
             $("#search > span#doc-title").show();
             $("#textfilter input").attr("value", "");
         });
@@ -368,7 +365,6 @@ function searchMembers(entities, regExp, pack) {
         $(entityUrl).click(function() {
             $("div#search-results").hide();
             $("#search > span.close-results").hide();
-            $("#search > span.toggle-sidebar").show();
             $("#search > span#doc-title").show();
             $("#textfilter input").attr("value", "");
         });
@@ -421,7 +417,6 @@ function insertSorted(ul, li) {
 function handleSearchedPackage(res, regExp) {
     $("div#search-results").show();
     $("#search > span.close-results").show();
-    $("#search > span.toggle-sidebar").hide();
     $("#search > span#doc-title").hide();
 
     var searchRes = document.getElementById("results-content");
@@ -445,7 +440,6 @@ function handleSearchedPackage(res, regExp) {
        .forEach(function(li) { ul.appendChild(li); });
 
     entityDiv.appendChild(ul);
-    searchRes.appendChild(entityDiv);
 }
 
 /** Searches an entity asynchronously for regExp matches in an entity's members
@@ -477,7 +471,6 @@ function searchEntity(entity, ul, regExp) {
             $(label).click(function() {
                 $("div#search-results").hide();
                 $("#search > span.close-results").hide();
-                $("#search > span.toggle-sidebar").show();
                 $("#search > span#doc-title").show();
                 $("#textfilter input").attr("value", "");
             });
@@ -520,7 +513,6 @@ function listItem(entity, regExp) {
     $(entityUrl).click(function() {
         $("div#search-results").hide();
         $("#search > span.close-results").hide();
-        $("#search > span.toggle-sidebar").show();
         $("#search > span#doc-title").show();
         $("#textfilter input").attr("value", "");
     });
@@ -555,32 +547,25 @@ function searchAll() {
     if (searchStr === '') {
         $("div#search-results").hide();
         $("#search > span.close-results").hide();
-        $("#search > span.toggle-sidebar").show();
         $("#search > span#doc-title").show();
         return;
     }
 
-    // Clear input field and results so as not to doubly display data
-    $("div#search-results > div#results-content").html("");
+    $("div#results-content > span.search-text").remove();
 
-    var resDiv = document.getElementById("results-content");
-    var entityResults = document.createElement("div");
-    entityResults.id = "entity-results";
-    var entityH1 = document.createElement("h1");
-    entityH1.className = "result-type";
-    entityH1.innerHTML = "Entity results";
-    entityResults.appendChild(entityH1);
-
-    resDiv.appendChild(entityResults);
-
-    var memberResults = document.createElement("div");
-    memberResults.id  = "member-results";
+    var memberResults = document.getElementById("member-results");
+    memberResults.innerHTML = "";
     var memberH1 = document.createElement("h1");
     memberH1.className = "result-type";
     memberH1.innerHTML = "Member results";
     memberResults.appendChild(memberH1);
 
-    resDiv.appendChild(memberResults);
+    var entityResults = document.getElementById("entity-results");
+    entityResults.innerHTML = "";
+    var entityH1 = document.createElement("h1");
+    entityH1.className = "result-type";
+    entityH1.innerHTML = "Entity results";
+    entityResults.appendChild(entityH1);
 
     $("div#results-content")
         .prepend("<span class='search-text'>"
