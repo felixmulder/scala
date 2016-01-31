@@ -15,10 +15,6 @@ $(document).ready(function()
 	if(Modernizr && !Modernizr.inlinesvg)
 		return;
 
-	// only execute this in the main window
-	if(diagrams.isPopup)
-		return;
-
 	if($("#content-diagram").length)
 		$("#inheritance-diagram").css("padding-bottom", "20px");
 
@@ -63,40 +59,6 @@ $(document).ready(function()
 
 	diagrams.initHighlighting();
 });
-
-/**
- * Initializes the diagrams in the popup.
- */
-diagrams.initPopup = function(id)
-{
-	// copy diagram from main window
-	if(!jQuery.browser.msie)
-		$("body").append(opener.$("#" + id).data("svg"));
-
-	// positioning
-	$("svg").css("position", "absolute");
-	$(window).resize(function()
-	{
-		var svg_w = $("svg").css("width").replace("px", "");
-		var svg_h = $("svg").css("height").replace("px", "");
-		var x = $(window).width() / 2 - svg_w / 2;
-		if(x < 0) x = 0;
-		var y = $(window).height() / 2 - svg_h / 2;
-		if(y < 0) y = 0;
-		$("svg").css("left", x + "px");
-		$("svg").css("top", y + "px");
-	});
-	$(window).resize();
-
-	diagrams.initHighlighting();
-	$("svg a").click(function(e) {
-		opener.diagrams.redirectFromPopup(this.href.baseVal);
-		window.close();
-	});
-	$(document).keyup(function(e) {
-		if (e.keyCode == 27) window.close();
-	});
-}
 
 /**
  * Initializes highlighting for nodes and edges.
@@ -193,21 +155,12 @@ diagrams.resize = function()
 		var diagramWidth = $(".diagram", this).data("width");
 		var diagramHeight = $(".diagram", this).data("height");
 
-		if(diagramWidth > availableWidth)
-		{
+		if(diagramWidth > availableWidth) {
 			// resize diagram
 			var height = diagramHeight / diagramWidth * availableWidth;
 			$(".diagram svg", this).width(availableWidth);
 			$(".diagram svg", this).height(height);
-
-			// register click event on whole div
-			$(".diagram", this).click(function() {
-				diagrams.popup($(this));
-			});
-			$(".diagram", this).addClass("magnifying");
-		}
-		else
-		{
+		} else {
 			// restore full size of diagram
 			$(".diagram svg", this).width(diagramWidth);
 			$(".diagram svg", this).height(diagramHeight);
@@ -226,78 +179,33 @@ diagrams.toggle = function(container, dontAnimate)
 	$(".diagram-link", container).toggleClass("open");
 	// get element to show / hide
 	var div = $(".diagram", container);
-	if (div.is(':visible'))
-	{
+	if (div.is(':visible')) {
 		$(".diagram-help", container).hide();
 		div.unbind("click");
 		div.removeClass("magnifying");
 		div.slideUp(100);
-	}
-	else
-	{
+        $("#diagram-controls", container).hide();
+        $("#inheritance-diagram-container").unbind('mousewheel.focal');
+	} else {
 		diagrams.resize();
-		if(dontAnimate)
-			div.show();
+		if (dontAnimate)
+            div.show();
 		else
-			div.slideDown(100);
+            div.slideDown(100);
 		$(".diagram-help", container).show();
+        $("#diagram-controls", container).show();
+
+        $("#inheritance-diagram-container").on('mousewheel.focal', function(e) {
+            e.preventDefault();
+            var delta = e.delta || e.originalEvent.wheelDelta;
+            var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
+            $panzoom.panzoom('zoom', zoomOut, {
+                increment: 0.1,
+                animate: true,
+                focal: e
+            });
+        });
 	}
-};
-
-/**
- * Opens a popup containing a copy of a diagram.
- */
-diagrams.windows = {};
-diagrams.popup = function(diagram)
-{
-	var id = diagram.attr("id");
-	if(!diagrams.windows[id] || diagrams.windows[id].closed) {
-		var title = $(".symbol .name", $("#signature")).text();
-		// cloning from parent window to popup somehow doesn't work in IE
-		// therefore include the SVG as a string into the HTML
-		var svgIE = jQuery.browser.msie ? $("<div />").append(diagram.data("svg")).html() : "";
-		var html = '' +
-		'<?xml version="1.0" encoding="UTF-8"?>\n' +
-		'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n' +
-		'<html>\n' +
-		'	<head>\n' +
-		'		<title>' + title + '</title>\n' +
-		'		<link href="' + $("#diagrams-css").attr("href") + '" media="screen" type="text/css" rel="stylesheet" />\n' +
-		'		<script type="text/javascript" src="' + $("#jquery-js").attr("src") + '"></script>\n' +
-		'		<script type="text/javascript" src="' + $("#diagrams-js").attr("src") + '"></script>\n' +
-		'		<script type="text/javascript">\n' +
-		'			diagrams.isPopup = true;\n' +
-		'		</script>\n' +
-		'	</head>\n' +
-		'	<body onload="diagrams.initPopup(\'' + id + '\');">\n' +
-		'		<a href="#" onclick="window.close();" id="close-link">Close this window</a>\n' +
-		'		' + svgIE + '\n' +
-		'	</body>\n' +
-		'</html>';
-
-		var padding = 30;
-		var screenHeight = screen.availHeight;
-		var screenWidth = screen.availWidth;
-		var w = Math.min(screenWidth, diagram.data("width") + 2 * padding);
-		var h = Math.min(screenHeight, diagram.data("height") + 2 * padding);
-		var left = (screenWidth - w) / 2;
-		var top = (screenHeight - h) / 2;
-		var parameters = "height=" + h + ", width=" + w + ", left=" + left + ", top=" + top + ", scrollbars=yes, location=no, resizable=yes";
-		var win = window.open("about:blank", "_blank", parameters);
-		win.document.open();
-		win.document.write(html);
-		win.document.close();
-		diagrams.windows[id] = win;
-	}
-	win.focus();
-};
-
-/**
- * This method is called from within the popup when a node is clicked.
- */
-diagrams.redirectFromPopup = function(url)
-{
-	window.location = url;
 };
 
 /**

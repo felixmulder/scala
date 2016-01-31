@@ -40,6 +40,8 @@ class Template(universe: doc.Universe, generator: DiagramGenerator, tpl: DocTemp
       <link href={ relativeLinkTo{List("template.css", "lib")} } media="screen" type="text/css" rel="stylesheet"/>
       <link href={ relativeLinkTo{List("diagrams.css", "lib")} } media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
       <script type="text/javascript" src={ relativeLinkTo{List("jquery.js", "lib")} } id="jquery-js"></script>
+      <script type="text/javascript" src={ relativeLinkTo{List("jquery.panzoom.min.js", "lib")} }></script>
+      <script type="text/javascript" src={ relativeLinkTo{List("jquery.mousewheel.min.js", "lib")} }></script>
       <script type="text/javascript" src={ relativeLinkTo{List("template.js", "lib")} }></script>
       <script type="text/javascript" src={ relativeLinkTo{List("tools.tooltip.js", "lib")} }></script>
       { if (universe.settings.docDiagrams.value) {
@@ -682,9 +684,14 @@ class Template(universe: doc.Universe, generator: DiagramGenerator, tpl: DocTemp
             if (diagramSvg != NodeSeq.Empty) {
               <div class="toggleContainer block diagram-container" id={ id + "-container"}>
                 <span class="toggle diagram-link">{ description }</span>
-                <div class="diagram" id={ id }>{
-                  diagramSvg
-                }</div>
+                <div class="diagram" id={ id }>
+                  { diagramSvg }
+                </div>
+                <div id="diagram-controls" class="hiddenContent">
+                  <button id="diagram-zoom-out" class="diagram-btn">-</button>
+                  <input type="range" id="diagram-zoom-range"></input>
+                  <button id="diagram-zoom-in" class="diagram-btn">+</button>
+                </div>
               </div>
             } else NodeSeq.Empty
           } else NodeSeq.Empty

@@ -49,6 +49,8 @@ class HtmlFactory(val universe: doc.Universe, index: doc.Index) {
 
     "index.js",
     "jquery.js",
+    "jquery.panzoom.min.js",
+    "jquery.mousewheel.min.js",
     "scheduler.js",
     "diagrams.js",
     "template.js",
