@@ -196,7 +196,7 @@ function handleKeyNavigation() {
     scheduler.add("init", function() {
         $("#textfilter input").blur();
         var items = new EntityIterator(
-            $("div#results-content > ul.entities span.entity > a").toArray()
+            $("div#results-content > div#entity-results > ul.entities span.entity > a").toArray()
         );
 
         var scroller = new Scroller($("#search-results"));
