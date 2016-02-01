@@ -141,10 +141,13 @@ var Index = {};
 /* Handles all key presses while scrolling around with keyboard shortcuts in search results */
 function handleKeyNavigation() {
     /** Iterates both back and forth among selected elements */
-    var EntityIterator = function (items) {
+    var EntityIterator = function (litems, ritems) {
         var it = this;
         this.index = -1;
-        this.items = items;
+
+        this.items = litems;
+        this.litems = litems;
+        this.ritems = ritems;
 
         /** Returns the next entry - if trying to select past last element, it
          * returns the last element
@@ -160,6 +163,18 @@ function handleKeyNavigation() {
         it.prev = function() {
             it.index = Math.max(-1, it.index - 1);
             return it.index == -1 ? undefined : $(it.items[it.index]);
+        };
+
+        it.right = function() {
+            it.items = it.ritems;
+            it.index = Math.min(it.index, it.items.length - 1);
+            return $(it.items[it.index]);
+        };
+
+        it.left = function() {
+            it.items = it.litems;
+            it.index = Math.min(it.index, it.items.length - 1);
+            return $(it.items[it.index]);
         };
     };
 
@@ -196,7 +211,8 @@ function handleKeyNavigation() {
     scheduler.add("init", function() {
         $("#textfilter input").blur();
         var items = new EntityIterator(
-            $("div#results-content > div#entity-results > ul.entities span.entity > a").toArray()
+            $("div#results-content > div#entity-results > ul.entities span.entity > a").toArray(),
+            $("div#results-content > div#member-results > ul.entities span.entity > a").toArray()
         );
 
         var scroller = new Scroller($("#search-results"));
@@ -217,11 +233,20 @@ function handleKeyNavigation() {
                 $("#textfilter input").attr("value", "");
                 break;
 
+            case 37: // left
+                var oldTop = $old.offset().top;
+                $old.removeClass("selected");
+                $old = items.left();
+                $old.addClass("selected");
+
+                (oldTop - $old.offset().top < 0 ? scroller.scrollDown : scroller.scrollUp)($old);
+                break;
+
             case 38: // up
                 $old.removeClass('selected');
                 $old = items.prev();
 
-                if ($old === undefined) {
+                if ($old === undefined) { // scroll past top
                     $(window).unbind("keydown");
                     $("#textfilter input").focus();
                     scroller.scrollTop();
@@ -230,6 +255,15 @@ function handleKeyNavigation() {
                     $old.addClass("selected");
                     scroller.scrollUp($old);
                 }
+                break;
+
+            case 39: // right
+                var oldTop = $old.offset().top;
+                $old.removeClass("selected");
+                $old = items.right();
+                $old.addClass("selected");
+
+                (oldTop - $old.offset().top < 0 ? scroller.scrollDown : scroller.scrollUp)($old);
                 break;
 
             case 40: // down
