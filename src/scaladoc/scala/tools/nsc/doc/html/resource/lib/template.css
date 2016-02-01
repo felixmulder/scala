@@ -1039,8 +1039,8 @@ div.fullcomment dl.paramcmts > dd {
 }
 
 #inheritance-diagram-container.full-screen {
-  position: fixed;
-  top: 3em;
+  position: fixed !important;
+  top: 0;
   bottom: 3em;
   left: 0;
   width: 100%;

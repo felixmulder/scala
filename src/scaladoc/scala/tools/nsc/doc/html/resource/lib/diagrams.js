@@ -58,6 +58,11 @@ $(document).ready(function()
 	});
 
 	diagrams.initHighlighting();
+
+    $("button#diagram-fs").click(function() {
+        $("#inheritance-diagram-container").toggleClass("full-screen");
+        $panzoom.panzoom("reset", { animate: false, contain: false });
+    });
 });
 
 /**

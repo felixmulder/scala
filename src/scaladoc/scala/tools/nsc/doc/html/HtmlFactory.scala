@@ -46,6 +46,9 @@ class HtmlFactory(val universe: doc.Universe, index: doc.Index) {
     "source-code-pro-v6-latin-regular.eot",
     "source-code-pro-v6-latin-regular.ttf",
     "source-code-pro-v6-latin-regular.woff",
+    "MaterialIcons-Regular.eot",
+    "MaterialIcons-Regular.ttf",
+    "MaterialIcons-Regular.woff",
 
     "index.js",
     "jquery.js",

@@ -691,6 +691,7 @@ class Template(universe: doc.Universe, generator: DiagramGenerator, tpl: DocTemp
                   <button id="diagram-zoom-out" class="diagram-btn">-</button>
                   <input type="range" id="diagram-zoom-range"></input>
                   <button id="diagram-zoom-in" class="diagram-btn">+</button>
+                  <button id="diagram-fs" class="diagram-btn to-full"><i class="material-icons">&#xE5D0;</i></button>
                 </div>
               </div>
             } else NodeSeq.Empty
