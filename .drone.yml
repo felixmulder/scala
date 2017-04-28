@@ -1,5 +1,5 @@
 pipeline:
   test:
-    image: webratio/ant:1.9.6
+    image: lampepfl/scala:28-04-17
     commands:
       - ant build
