@@ -1,0 +1,5 @@
+pipeline:
+  test:
+    image: webratio/ant:1.9.6
+    commands:
+      - ant build
